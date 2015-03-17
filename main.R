@@ -18,7 +18,7 @@ frame.bg <- readImage("data/background.tif")
 # dark[dark==0] <- 1
 # display(dark)
 # 
-# frame.1 <- readImage("data/frame1.tif")
+
 # 
 # 
 # 
@@ -26,15 +26,16 @@ frame.bg <- readImage("data/background.tif")
 
 
 # This definitely works
-test <- createArtifactMask(frame.bg)
-test <- frame.bg * test
-test[test==0] <- 1
-
-# sq <- readImage("examples/d1.tif")
-# display(sq[22:237, 5:220])
+artifactMask <- createArtifactMask(frame.bg)
+artifactMask <- artifactMask < 1 # invert
+# Save it
+writeImage(artifactMask, "artifactMask.tiff")
 
 
-#215 #215
+
+frame.1 <- readImage("data/frame1.tif")
+# White out masked area
+frame.1[artifactMask] <- 1
 
 
 
