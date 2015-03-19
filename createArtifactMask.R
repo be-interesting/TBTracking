@@ -52,54 +52,58 @@ createArtifactMask <- function(bg) {
           output[x:(x+30),y:(y+30)] <- output[x:(x+30),y:(y+30)] * createFillCircle(31, 31, 9)
       }
       
-
-      sq.x <- 230
-      sq.y <- 230 
-      
-      if (x < dim.x - sq.x & y < dim.y - sq.y) {
+  
+        sq.x <- 230
+        sq.y <- 230 
         
-        # Get subset of original
-        subset <- bg.data[x:(x+(sq.x-1)),y:(y+sq.y-1)]
-        
-        perDark <- function(m) {
-          return(sum(m<0.5, na.rm=TRUE) / (dim(m)[[1]] * dim(m)[[2]]))
+        if (x < dim.x - sq.x & y < dim.y - sq.y) {
+          
+          # Get subset of original
+          subset <- bg.data[x:(x+(sq.x-1)),y:(y+sq.y-1)]
+          
+          # What percent of this matrix is "dark"
+          perDark <- function(m) {
+            return(sum(m<0.5, na.rm=TRUE) / (dim(m)[[1]] * dim(m)[[2]]))
+          }
+          
+          # is a darker than b?
+          isDarker <- function(a,b) {
+            return(perDark(a) - perDark(b) > 0.28)
+          }
+          
+          # get y strips for comparison
+          y11 <- subset[0:20, ]
+          y12 <- subset[20:40, ]
+          y21 <- subset[(sq.x-20):sq.x, ]
+          y22 <- subset[(sq.x-40):(sq.x-20), ]
+          
+          # get x strips for comparison
+          x11 <- subset[ ,0:20]
+          x12 <- subset[ ,20:40]
+          x21 <- subset[ ,(sq.x-20):sq.x]
+          x22 <- subset[ ,(sq.x-40):(sq.x-20)]
+          
+          # get center
+          cx1 <- round(sq.x/2 - 10)
+          cx2 <- round(sq.x/2 + 10)
+          cy1 <- round(sq.y/2 - 10)
+          cy2 <- round(sq.y/2 + 10)
+          center <- subset[cx1:cx2,cy1:cy2]
+          
+          # rules that squares tend to follow
+          if (isDarker(y12,y11) & isDarker(y22,y21) & isDarker(x12, x11) & isDarker(x22, x21)
+              & perDark(center) < 0.3) {
+            # create a square mask. the mask is a little smaller than the sample
+            # because I only want to remove the dark parts
+            sq.mask <- matrix(0, sq.x, sq.y)
+            sq.mask[1:6, ] <- 1
+            sq.mask[(sq.x-6):sq.x, ] <- 1
+            sq.mask[,1:6] <- 1
+            sq.mask[,(sq.y-6):sq.y] <- 1
+            output[x:(x+(sq.x-1)),y:(y+sq.y-1)] <- output[x:(x+(sq.x-1)),y:(y+sq.y-1)] * sq.mask
+          }
+          
         }
-        
-        isDarker <- function(a,b) {
-          return(perDark(a) - perDark(b) > 0.28)
-        }
-        
-        # compare y strips
-        y11 <- subset[0:20, ]
-        y12 <- subset[20:40, ]
-        y21 <- subset[(sq.x-20):sq.x, ]
-        y22 <- subset[(sq.x-40):(sq.x-20), ]
-        
-        # compare x strips
-        x11 <- subset[ ,0:20]
-        x12 <- subset[ ,20:40]
-        x21 <- subset[ ,(sq.x-20):sq.x]
-        x22 <- subset[ ,(sq.x-40):(sq.x-20)]
-        
-        # get center
-        cx1 <- round(sq.x/2 - 10)
-        cx2 <- round(sq.x/2 + 10)
-        cy1 <- round(sq.y/2 - 10)
-        cy2 <- round(sq.y/2 + 10)
-        center <- subset[cx1:cx2,cy1:cy2]
-        
-        
-        if (isDarker(y12,y11) & isDarker(y22,y21) & isDarker(x12, x11) & isDarker(x22, x21)
-            & perDark(center) < 0.3) {
-          # mask subset with square
-          sq.mask <- matrix(0, sq.x, sq.y)
-          sq.mask[1:6, ] <- 1
-          sq.mask[(sq.x-6):sq.x, ] <- 1
-          sq.mask[,1:6] <- 1
-          sq.mask[,(sq.y-6):sq.y] <- 1
-          output[x:(x+(sq.x-1)),y:(y+sq.y-1)] <- output[x:(x+(sq.x-1)),y:(y+sq.y-1)] * sq.mask
-        }
-      }
         
     }
   }
