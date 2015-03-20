@@ -9,23 +9,29 @@ source("darkLineMask.R")
 # "Levels" algorithm to isolate bacteria as black pixels
 # Statistically group black clumps together
 
-# read in the background frame for testing
-frame.bg <- rotate(readImage("data/background.tif"),0.5)
+# read in the background frame
 # mean: 0.4575868
+frame.bg <- rotate(readImage("data/background.tif"),0.5)
 
-frame.1 <- rotate(readImage("data/frame1.tif"),0.5)
-# mean: 0.4658735
-
-lineMask <- darkLineMask(frame.1)
-
-
-# This definitely works
+# create a background artifact mask
 artifactMask <- createArtifactMask(frame.bg)
 artifactMask <- artifactMask < 1 # invert
 # Save it
 writeImage(artifactMask, "artifactMask.tiff")
 
-# rotate!
+
+# read in a sample frame of data
+# mean: 0.4658735
+frame.1 <- rotate(readImage("data/frame1.tif"),0.5)
+
+# generate a line mask
+lineMask <- darkLineMask(frame.1)
+
+
+
+############################################################################
+###################### image value processing example ######################
+############################################################################
 
 mask <- rotate(readImage("artifactMask.tiff"),0.5)
 lineMask[mask > 0] <- 1
@@ -54,35 +60,96 @@ for(i in 1:max(d)) {
 
 f <- bwlabel(e)@.Data
 
+##################################################################
+##################################################################
+##################################################################
 
 
+##################################################################
+################ texture processing example ######################
+##################################################################
+
+frame.3 <- rotate(readImage("data/frame3.tif"),0.5)
+mask <- rotate(readImage("artifactMask.tiff"),0.5)
+frame.3[mask>0] <- 1
+
+s1 <- frame.3[50:150, 650:750] # all bacteria
+s2 <- frame.3[450:550, 150:250] # no bacteria
+s3 <- frame.3[400:500, 700:800] # some of both
 
 
+b1 <- round(s1*10)/10
+b2 <- round(s2*10)/10
+b3 <- round(s3*10)/10
 
-frame.1 <- readImage("data/frame1-post.tif")
+# s1.diff <- apply(s1, 1, function(x) abs(diff(x))) 
+# s2.diff <- apply(s2, 1, function(x) abs(diff(x)))
+# s3.diff <- apply(s3, 1, function(x) abs(diff(x)))
+# 
+# s1.diff[s1.diff>0.15] <- 0
+# s2.diff[s2.diff>0.15] <- 0
+# s3.diff[s3.diff>0.15] <- 0
+# 
+# test <- kmeans(s1, 5)$centers
+# 
+# tx <- c()
+# ty <- c()
+# 
+# # https://courses.cs.washington.edu/courses/cse576/book/ch7.pdf
+# # Texture energy analysis
+# 
+# 
+# # empty plot for checking rows
+# plot(0,0,xlim=c(0,100), ylim=c(0,1))
+# 
+# apply(b1, 1, function(x) points(diff(x), pch=19))
+# apply(b2, 1, function(x) points(diff(x), pch=19, col="red"))
+# 
+# mean(apply(b1, 1, function(x) mean(abs(diff(x)))))
+# mean(apply(b3, 1, function(x) mean(abs(diff(x)))))
 
-a <- bwlabel(frame.1)
-a.d <- a@.Data
 
-for(i in 1:max(a.d)) {
-  print(i)
-  t <- a.d == i
-  size <- sum(t)
-  if(size < 55) {
-    a.d[t] <- 0
+c1 <- coocc(s1@.Data)
+c2 <- coocc(s2@.Data)
+c3 <- coocc(s3@.Data)
+
+# energy
+e1 <- sum(c1[[1]]^2)
+e2 <- sum(c2[[1]]^2)
+
+# Homogeneity
+homogeneity <- function(m) {
+  h = 0
+  for(i in 1:dim(m)[[1]]) {
+    for(j in 1:dim(m)[[2]]) {
+      s <- m[i,j] / (1 + abs(i - j))
+      h <- h + s
+    }
   }
+  return(h)
 }
 
-kern = makeBrush(3, shape='disc')
-a.d = dilateGreyScale(a.d, kern)
+apply(b2, 1, function(x) points(diff(x), pch=19, col="red"))
+
+apply(s2.diff[0:10,], 1, function(x) lines(x, col="red"))
+apply(s2.diff, 1, function(x) lines(x, col="blue"))
+
+
+lines(s2.diff[,1])
 
 
 
-frame.1[a.d > 0] <- 1
+test <- matrix(0,100,109)
 
+frame.3d <- frame.3@.Data
 
-
-
-end <- rotate(readImage("data/frame3.tif"), 0.5)
-end[mask > 0] <- 1
-
+for (x in 1:((dim(frame.3)[[1]]-15)/15)) {
+  x1 <- 1 + 15*(x-1)
+  for (y in 1:((dim(frame.3)[[2]]-15)/15)) {
+    print(paste(x,y))
+    y1 <- 1 + 15*(y-1)
+    ss <- frame.3d[x1:(x1+15),y1:(y1+15)]
+    c <- coocc(ss)
+    test[x,y] <- homogeneity(c)
+  }
+}
