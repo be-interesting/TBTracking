@@ -3,6 +3,7 @@ library(EBImage)
 source("createFillCircle.R")
 source("createArtifactMask.R")
 source("darkLineMask.R")
+source("cooccurance.R")
 
 # Load artifact mask TODO should this include removing dark lines?
 # Align with background
@@ -69,9 +70,15 @@ f <- bwlabel(e)@.Data
 ################ texture processing example ######################
 ##################################################################
 
+frame.bg <- rotate(readImage("data/background.tif"),0.5)
+mask <- rotate(readImage("artifactMask.tiff"),0.5)
+frame.bg[mask>0] <- 1
+
 frame.3 <- rotate(readImage("data/frame3.tif"),0.5)
 mask <- rotate(readImage("artifactMask.tiff"),0.5)
 frame.3[mask>0] <- 1
+
+frame.diff <- 5*(frame.3-frame.bg)
 
 s1 <- frame.3[50:150, 650:750] # all bacteria
 s2 <- frame.3[450:550, 150:250] # no bacteria
@@ -134,30 +141,56 @@ apply(b2, 1, function(x) points(diff(x), pch=19, col="red"))
 apply(s2.diff[0:10,], 1, function(x) lines(x, col="red"))
 apply(s2.diff, 1, function(x) lines(x, col="blue"))
 
-
 lines(s2.diff[,1])
 
 
 
+frame.3 <- rotate(readImage("data/frame3.tif"),0.5)
+mask <- rotate(readImage("artifactMask.tiff"),0.5)
+frame.3[mask>0] <- 1
+
 homo <- matrix(0,200,206)
-ener <- matrix(0,170,170)
-entr <- matrix(0,170,170)
+ener <- matrix(0,200,206)
+entr <- matrix(0,200,206)
 
-frame.3d <- frame.3@.Data
-cpy <- frame.3d
+# frame.3d <- frame.3@.Data
+# cpy <- frame.3d
 
-for (x in 151:((dim(frame.3d)[[1]]-8)/8)) {
+frame.3d <- frame.diff@.Data
+frame.3d[frame.3d > 1] <- 1
+
+for (x in 31:((dim(frame.3d)[[1]]-8)/8)) {
   x1 <- 1 + 8*(x-1)
-  for (y in 12:((dim(frame.3d)[[2]]-8)/8)) {
+  for (y in 104:((dim(frame.3d)[[2]]-8)/8)) {
     print(paste(x,y))
     y1 <- 1 + 8*(y-1)
     ss <- frame.3d[x1:(x1+8),y1:(y1+8)]
     c <- coocc(ss)
-    ss[ss==1] <- NA
+#     ss[ss==1] <- NA
     m <- mean(ss, na.rm=TRUE)
-    homo[x,y] <- homogeneity(c) * m
-#     ener[x,y] <- energy(c) * m
-#     entr[x,y] <- entropy(c) * m
+    homo[x,y] <- homogeneity(c)
+#     ener[x,y] <- energy(c)
+#     entr[x,y] <- entropy(c)
   }
 }
 
+
+
+
+
+
+#### TEST
+
+a <- round(test@.Data*8) / 8
+b <- !a
+
+c <- bwlabel(b)@.Data
+d <- c
+
+for (i in 1:max(c)) {
+  x <- c == i
+  print(sum(x))
+  if (sum(x) < 10) {
+    d[x] <- 0
+  }
+}
