@@ -139,17 +139,25 @@ lines(s2.diff[,1])
 
 
 
-test <- matrix(0,100,109)
+homo <- matrix(0,200,206)
+ener <- matrix(0,170,170)
+entr <- matrix(0,170,170)
 
 frame.3d <- frame.3@.Data
+cpy <- frame.3d
 
-for (x in 1:((dim(frame.3)[[1]]-15)/15)) {
-  x1 <- 1 + 15*(x-1)
-  for (y in 1:((dim(frame.3)[[2]]-15)/15)) {
+for (x in 151:((dim(frame.3d)[[1]]-8)/8)) {
+  x1 <- 1 + 8*(x-1)
+  for (y in 12:((dim(frame.3d)[[2]]-8)/8)) {
     print(paste(x,y))
-    y1 <- 1 + 15*(y-1)
-    ss <- frame.3d[x1:(x1+15),y1:(y1+15)]
+    y1 <- 1 + 8*(y-1)
+    ss <- frame.3d[x1:(x1+8),y1:(y1+8)]
     c <- coocc(ss)
-    test[x,y] <- homogeneity(c)
+    ss[ss==1] <- NA
+    m <- mean(ss, na.rm=TRUE)
+    homo[x,y] <- homogeneity(c) * m
+#     ener[x,y] <- energy(c) * m
+#     entr[x,y] <- entropy(c) * m
   }
 }
+

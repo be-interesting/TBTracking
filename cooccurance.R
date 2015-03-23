@@ -8,11 +8,15 @@ coocc <- function(m, breaks=10) {
   c <- matrix(0, breaks, breaks)
   for (x1 in 1:breaks) {
     for (y1 in 1:breaks) {
-      for (y2 in 1:dim(m)[[2]] - 1) {
-        for (x2 in 1:dim(m)[[1]] - 1) {
-          v0 <- m[x2,y2]
-          v1 <- m[x2+1,y2+1]
+      for (y2 in 1:dim(m)[[2]] - 2) {
+        for (x2 in 1:dim(m)[[1]] - 2) {
+          v0 <- m[x2, y2]
+          v1 <- m[x2+1, y2]
+          v2 <- m[x2, y2+1]
+          v3 <- m[x2+1, y2+1]
           c[v0,v1] <- c[v0,v1] + 1
+          c[v0,v2] <- c[v0,v2] + 1
+          c[v0,v3] <- c[v0,v3] + 1
         }
       }
     }
