@@ -1,4 +1,5 @@
 library(EBImage)
+library(glcm)
 
 source("createFillCircle.R")
 source("createArtifactMask.R")
@@ -192,5 +193,86 @@ for (i in 1:max(c)) {
   print(sum(x))
   if (sum(x) < 10) {
     d[x] <- 0
+  }
+}
+
+
+
+# TESTING GLCM
+
+a <- glcm(frame.3@.Data, n_grey=30, window=c(5,5))
+
+display(a[,,1])
+display(a[,,2])
+display(a[,,3])
+display(a[,,4])
+display(a[,,5])
+display(a[,,6])
+display(a[,,7])
+display(a[,,8])
+
+
+b <- a[,,4]
+c <- b*(frame.3@.Data<0.5)
+c[is.na(c)] <- 0
+c[c > 1] <- 1
+
+
+flo <- makeBrush(15, shape="disc", step=FALSE)^2
+flo <- flo/sum(flo)
+d <- filter2(c, flo)
+d <- (d-frame.bg@.Data)*2 
+d[d<0] <- 0
+d[d>1] <- 1
+
+
+e <- frame.3@.Data-d
+
+d[d<0] <- 0
+d[d>1] <- 1
+
+
+
+d <- (c > 0.5)
+# d[mask > 0] <- 0
+
+
+
+
+
+
+# flo <- makeBrush(15, shape="disc", step=FALSE)^2
+# flo <- flo/sum(flo)
+# d <- filter2(c, flo)
+# 
+# e <- (d^1.5)
+# e[mask>0] <- 0
+
+e <- d < 1
+
+kern <- makeBrush(5, shape='disc')
+# e <- dilateGreyScale(d, kern)
+e <- erodeGreyScale(e, kern)
+# 
+
+f <- bwlabel(e)@.Data
+g <- f
+
+
+
+h <- erodeGreyScale(g<1, kern)
+h <- bwlabel(h)@.Data
+aa <- h
+
+
+
+removeBlobs <- function(m, size) {
+  m <- bwlabel(m)
+  m1 <- m
+  for (i in 1:max(m)) {
+    x <- m == i
+    if (sum(x) < size) {
+      m1[x] <- 0
+    }
   }
 }
