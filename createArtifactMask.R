@@ -114,7 +114,7 @@ createArtifactMask <- function(bg) {
   e <- erodeGreyScale(d, kern)
   
   # Expand the circles a bit
-  kern <- makeBrush(5, shape='disc')
+  kern <- makeBrush(7, shape='disc')
   e <- dilateGreyScale(e, kern)
   
   f <- e
