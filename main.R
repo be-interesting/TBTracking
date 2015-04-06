@@ -8,15 +8,18 @@ source("darkLineMask.R")
 frame01 <- rotate(readImage("examples/set_1/frame01.tif"),0.5)@.Data
 
 artifactMask <- createArtifactMask(frame01)
-artifactMask <- artifactMask < 1 # invert
+# artifactMask <- artifactMask < 1 # invert
 
 # Save it
-writeImage(artifactMask, "examples/artifactMask.tiff")
+# writeImage(artifactMask, "examples/artifactMask.tiff")
 
 
 
 
 frame02 <- rotate(readImage("examples/set_1/frame02.tif"),0.5)@.Data
+frame03 <- rotate(readImage("examples/set_1/frame03.tif"),0.5)@.Data
+frame04 <- rotate(readImage("examples/set_1/frame04.tif"),0.5)@.Data
+frame05 <- rotate(readImage("examples/set_1/frame05.tif"),0.5)@.Data
 
 # generate a line mask
 lineMask <- darkLineMask(frame02)
@@ -26,10 +29,8 @@ lineMask <- darkLineMask(frame02)
 
 
 # TESTING GLCM
-frame.1 <- rotate(readImage("data/frame1.tif"),0.5)
-frame.3 <- rotate(readImage("data/frame3.tif"),0.5)
 
-a <- glcm(frame.3@.Data, n_grey=30, window=c(5,5))
+a <- glcm(frame02, n_grey=30, window=c(5,5))
 
 display(a[,,1])
 display(a[,,2])
@@ -43,31 +44,35 @@ display(a[,,8])
 
 # lots of bacteria
 b <- a[,,4]
-c <- b*(frame.3@.Data<0.5)
+c <- b*(frame02<0.5)
 c[is.na(c)] <- 0
 c[c > 1] <- 1
-
 
 kern <- makeBrush(7, shape='disc')
 e <- dilateGreyScale(c, kern)
 e <- erodeGreyScale(e, kern)
-e <- e > 0.64
+e <- e > 0.62
  
-e[mask>0] <- 0
+e[artifactMask>0] <- 0
+e[lineMask==1] <- 0
 
 f <- removeBlobs(e<1, 150)
 g <- removeBlobs(f<1, 150)
 
 
 
+
+
+
 # few bacteria
-frame.1[mask>0] <-1
-a <- darkLineMask(frame.1)@.Data
+frame02[artifactMask>0] <- 1
+frame02[lineMask==1] <- 1
+a <- frame02
 a[a==1] <- NA
 
 b <- glcm(a, n_grey=30, window=c(5,5), min_x=0, max_x=1, na_opt="any")
 
-c <- b[,,3]*(frame.3@.Data<0.5)
+c <- b[,,3]*(frame02<0.5)
 
 d <- c < 0.2
 d[is.na(d)] <- 0
@@ -81,36 +86,9 @@ f <- removeBlobs(e, 75)
 
 
 
-# 
-# dflo <- makeBrush(15, shape="disc", step=FALSE)^2
-# flo <- flo/sum(flo)
-# d <- filter2(c, flo)
-# d <- (d-frame.bg@.Data)*2 
-# d[d<0] <- 0
-# d[d>1] <- 1
-# 
-# 
-# e <- frame.3@.Data-d
-# 
-# d[d<0] <- 0
-# d[d>1] <- 1
-# 
-# 
-# 
-# d <- (c > 0.5)
-# # d[mask > 0] <- 0
 
 
 
-
-
-
-# flo <- makeBrush(15, shape="disc", step=FALSE)^2
-# flo <- flo/sum(flo)
-# d <- filter2(c, flo)
-# 
-# e <- (d^1.5)
-# e[mask>0] <- 0
 
 e <- d < 1
 
@@ -136,8 +114,72 @@ removeBlobs <- function(m, size) {
   for (i in 1:max(m)) {
     x <- m == i
     if (sum(x) < size) {
+      print(i)
       m1[x] <- 0
     }
   }
   return(m1)
 }
+
+
+# isolateEarly1 <- function(m) {
+
+  a <- glcm(m, n_grey=20, window=c(5,5), min_x=0, max_x=0.5, na_opt="any")
+  
+  # few bacteria
+  b <- a[,,4]
+  c <- b*(frame02<0.3)
+  c[is.na(c)] <- 0
+  c[c > 1] <- 1
+  
+  kern <- makeBrush(3, shape='disc')
+  e <- dilateGreyScale(c, kern)
+  e <- erodeGreyScale(e, kern)
+  e <- e > 0.68
+  
+  e[artifactMask>0] <- 0
+  e[lineMask==1] <- 0
+  
+  f <- removeBlobs(e<1, 150)
+  g <- removeBlobs(f<1, 150)
+  
+  kern <- makeBrush(3, shape='disc')
+  h <- erodeGreyScale(g, kern)
+
+}
+
+# This is better
+isolateEarly2 <- function(m) {
+  
+  lineMask <- darkLineMask(m)
+  
+  a <- glcm(m, n_grey=20, window=c(5,5), min_x=0, max_x=0.5, na_opt="any")
+  
+  # few bacteria
+  b <- a[,,4]
+  c <- b*(m<0.3)
+  c[is.na(c)] <- 0
+  c[c > 1] <- 1
+  
+  kern <- makeBrush(3, shape='disc')
+  e <- dilateGreyScale(c, kern)
+  e <- erodeGreyScale(e, kern)
+  e <- e > 0.68
+  
+  e[artifactMask>0] <- 0
+  e[lineMask==1] <- 0
+  
+  f <- removeBlobs(e<1, 25)
+  g <- removeBlobs(f<1, 25)
+  
+  kern <- makeBrush(3, shape='disc')
+  h <- dilateGreyScale(g, kern)
+  
+  return(h)
+  
+}
+
+test1 <- isolateEarly2(frame02)
+test2 <- isolateEarly2(frame03)
+test3 <- isolateEarly2(frame04)
+test4 <- isolateEarly2(frame05)

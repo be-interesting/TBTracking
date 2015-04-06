@@ -71,7 +71,7 @@ darkLineMask <- function(df) {
 #     eroded <- erodeGreyScale(dilated, kern)
     
     df[ ,(i-7):(i+7)] <- mask * df[ ,(i-7):(i+7)]
-    df[ ,(i-3):(i+11)] <- mask * df[ ,(i-3):(i+11)]
+    df[ ,(i-1):(i+13)] <- mask * df[ ,(i-1):(i+13)]
 
   }
   
