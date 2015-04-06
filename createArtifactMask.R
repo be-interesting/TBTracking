@@ -34,6 +34,7 @@ createArtifactMask <- function(bg) {
   ####### REMOVING THE SQUARES #######
   ####################################
   
+  # Find areas of significant change to search
   sq.row <- diff(apply(bg,2,sd) > 0.2)
   sq.row.start <- which(sq.row==1)
   
@@ -98,6 +99,7 @@ createArtifactMask <- function(bg) {
   }
   
   # create a texture mask
+  # use the contrast statistic (layer 5)
   a <- glcm(bg, n_grey=10)[,,5]
   
   # dilate and erode to close gaps in the middle of circles
@@ -127,7 +129,5 @@ createArtifactMask <- function(bg) {
   }
   
   return(f)
-  
-  
   
 }
