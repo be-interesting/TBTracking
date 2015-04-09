@@ -38,7 +38,7 @@ createArtifactMask <- function(bg) {
   sq.row <- diff(apply(bg,2,sd) > 0.2)
   sq.row.start <- which(sq.row==1)
   
-  sq.col <- diff(apply(bg,1,sd) > 0.15)
+  sq.col <- diff(apply(bg,1,sd) > 0.18)
   sq.col.start <- which(sq.col==1)
   
   # Expand the search range a little bit

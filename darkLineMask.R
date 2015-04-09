@@ -23,60 +23,26 @@ darkLineMask <- function(df) {
   
   # For each of these high points, mask the background and save the bacter
   for (i in indices) {
-  
-    # isolate darkest area
-    sample <- df[ ,(i-7):(i+7)]
     
-    bright <- sample > 0.5
-    kern = makeBrush(7, shape='disc')
-    bright = dilateGreyScale(bright, kern)
-    sample[bright > 0] <- 0.3
-#     test1 <- c()
-#     test2 <- c()
-#     test3 <- c()
+    y1 <- i-11
+    y2 <- i+13
     
-    mask <- sample
+    sample <- df[ ,y1:y2]
     
-    for(x in 1:(dim(sample)[[1]]-5)) {
-      slice <- sample[x:(x+5), ] * 2
-#       test1 <- c(test1, min(slice))
-#       test2 <- c(test2, mean(slice))
-#       test3 <- c(test3, norm(diff(slice)))
-      if (norm(diff(slice)) > 0.3) {
-        mask[x:(x+5), ] <- 1
-      }
-    }
+    a <- glcm(sample, shift=list(c(-1,0),c(1,0)), window=c(3,3), min_x=0, max_x=0.5, na_opt="ignore")
+    b <- a[,,3] < 0.45
 
-    mask[mask<1] <- 0
-    
+    kern <- makeBrush(7, shape='disc')
+    dilated <- dilateGreyScale(b, kern)
+    eroded <- erodeGreyScale(dilated, kern)
 
+    mask <- eroded
     
-    
-    
-    
-#     # brighten so bacteria stand out more
-#     
-#     # find and expand bright area
-#     bright <- sample > 0.5
-#     kern <- makeBrush(3, shape='disc')
-#     bright <- dilateGreyScale(bright, kern)
-#     sample[bright > 0] <- 0.3
-#     
-#     a <- glcm(sample, min_x=0, max_x=0.25)[,,3]
-#     
-#     a <- a * sample < 0.1
-#     
-#     kern <- makeBrush(7, shape='disc')
-#     dilated <- dilateGreyScale(a, kern)
-#     eroded <- erodeGreyScale(dilated, kern)
-    
-    df[ ,(i-7):(i+7)] <- mask * df[ ,(i-7):(i+7)]
-    df[ ,(i-1):(i+13)] <- mask * df[ ,(i-1):(i+13)]
+    df[ ,y1:y2] <- mask * df[ ,y1:y2]
+#     df[ ,(i-1):(i+13)] <- mask * df[ ,(i-1):(i+13)]
 
   }
-  
-  df[df==0] <- 1
 
-  return(df)
+  return(df==0)
 
 }
