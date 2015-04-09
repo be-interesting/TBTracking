@@ -12,6 +12,7 @@ artifactMask <- createArtifactMask(frame01@.Data)
 
 # Save it
 # writeImage(artifactMask, "examples/artifactMask.tiff")
+artifactMask <- readImage("examples/artifactMask.tiff")
 
 # Load sample data
 frame02 <- rotate(readImage("examples/set_3/frame02.tif"),0.5)
@@ -25,34 +26,47 @@ frame09 <- rotate(readImage("examples/set_3/frame09.tif"),0.5)
 frame10 <- rotate(readImage("examples/set_3/frame10.tif"),0.5)
 frame11 <- rotate(readImage("examples/set_3/frame11.tif"),0.5)
 
-# generate a line mask
-lineMask <- darkLineMask(frame02)
 
 
 
 
-
-
-
+# Remove all blobs under a certain size threshold
 removeBlobs <- function(m, size) {
+  # Label blobs
   m <- bwlabel(m)
+  # Save dimensions
   dims <- dim(m)
+  # Unravel matrix and count the occurances of each label
   sorted <- sort(table(as.numeric(m)))
+  # Labels which are under the threshold
   small <- as.numeric(names(sorted[sorted<size]))
-  is.small <- m %in% small
-  m[is.small] <- 0
+  # Remove pixels that fall into undersized labels
+  m[m %in% small] <- 0
+  # Turn back into matrix
   m <- matrix(m, nrow=dims[[1]], ncol=dims[[2]])
   return(m)
 }
 
 
 
-# This is better
+# Returns a black and white mask of where bacteria can be found
 isolateEarly <- function(m) {
   
+  clock <- proc.time()
+  
+  
+  
+  # Create mask of where dark lines are unlikely to contain bacteria
   lineMask <- darkLineMask(m)
   
+  print("LineMask finished")
+  print(proc.time() - clock)
+  
+  # Create glcm masks
   a <- glcm(m, n_grey=20, window=c(5,5), min_x=0, max_x=0.5, na_opt="any")
+  
+  print("glcm finished")
+  print(proc.time() - clock)
   
   # few bacteria
   b <- a[,,4]
@@ -61,22 +75,30 @@ isolateEarly <- function(m) {
   c[c > 1] <- 1
   
   kern <- makeBrush(3, shape='disc')
-  e <- dilateGreyScale(c, kern)
-  e <- erodeGreyScale(e, kern)
-  e <- e > 0.68
-  
+  d <- dilateGreyScale(c, kern)
+  d <- erodeGreyScale(d, kern)
+  e <- d > 0.68
+
+  # Apply artifact mask for experiment and linemask for this frame
   e[artifactMask>0] <- 0
   e[lineMask==1] <- 0
   
+  # Remove small blobs
   f <- removeBlobs(e<1, 25)
   g <- removeBlobs(f<1, 25)
   
+  print("Blob removal finished")
+  print(proc.time() - clock)
+  
+  # Slightly dilate to join fragments together
   kern <- makeBrush(3, shape='disc')
   h <- dilateGreyScale(g, kern)
   
   return(h)
   
 }
+
+
 
 test1 <- isolateEarly(frame02@.Data)
 test2 <- isolateEarly(frame03@.Data)
