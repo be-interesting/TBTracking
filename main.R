@@ -32,97 +32,17 @@ lineMask <- darkLineMask(frame02)
 
 
 
-# TESTING GLCM
-
-a <- glcm(frame02, n_grey=30, window=c(5,5))
-
-display(a[,,1])
-display(a[,,2])
-display(a[,,3])
-display(a[,,4])
-display(a[,,5])
-display(a[,,6])
-display(a[,,7])
-display(a[,,8])
-
-
-# lots of bacteria
-b <- a[,,4]
-c <- b*(frame02<0.5)
-c[is.na(c)] <- 0
-c[c > 1] <- 1
-
-kern <- makeBrush(7, shape='disc')
-e <- dilateGreyScale(c, kern)
-e <- erodeGreyScale(e, kern)
-e <- e > 0.62
- 
-e[artifactMask>0] <- 0
-e[lineMask==1] <- 0
-
-f <- removeBlobs(e<1, 150)
-g <- removeBlobs(f<1, 150)
-
-
-
-
-
-
-# few bacteria
-frame02[artifactMask>0] <- 1
-frame02[lineMask==1] <- 1
-a <- frame02
-a[a==1] <- NA
-
-b <- glcm(a, n_grey=30, window=c(5,5), min_x=0, max_x=1, na_opt="any")
-
-c <- b[,,3]*(frame02<0.5)
-
-d <- c < 0.2
-d[is.na(d)] <- 0
-
-kern <- makeBrush(7, shape='disc')
-e <- dilateGreyScale(d, kern)
-e <- erodeGreyScale(e, kern)
-
-f <- removeBlobs(e, 75)
-
-
-
-
-
-
-
-
-e <- d < 1
-
-kern <- makeBrush(5, shape='disc')
-# e <- dilateGreyScale(d, kern)
-e <- erodeGreyScale(e, kern)
-# 
-
-f <- bwlabel(e)@.Data
-g <- f
-
-
-
-h <- erodeGreyScale(g<1, kern)
-h <- bwlabel(h)@.Data
-aa <- h
-
 
 
 removeBlobs <- function(m, size) {
   m <- bwlabel(m)
-  m1 <- m
-  for (i in 1:max(m)) {
-    x <- m == i
-    if (sum(x) < size) {
-      print(i)
-      m1[x] <- 0
-    }
-  }
-  return(m1)
+  dims <- dim(m)
+  sorted <- sort(table(as.numeric(m)))
+  small <- as.numeric(names(sorted[sorted<size]))
+  is.small <- m %in% small
+  m[is.small] <- 0
+  m <- matrix(m, nrow=dims[[1]], ncol=dims[[2]])
+  return(m)
 }
 
 
