@@ -11,7 +11,7 @@ artifactMask <- createArtifactMask(frame01@.Data)
 # artifactMask <- artifactMask < 1 # invert
 
 # Save it
-# writeImage(artifactMask, "examples/artifactMask.tiff")
+writeImage(artifactMask, "examples/artifactMask.tiff")
 artifactMask <- readImage("examples/artifactMask.tiff")
 
 # Load sample data
@@ -54,8 +54,6 @@ isolateEarly <- function(m) {
   
   clock <- proc.time()
   
-  
-  
   # Create mask of where dark lines are unlikely to contain bacteria
   lineMask <- darkLineMask(m)
   
@@ -68,33 +66,56 @@ isolateEarly <- function(m) {
   print("glcm finished")
   print(proc.time() - clock)
   
-  # few bacteria
-  b <- a[,,4]
-  c <- b*(m<0.3)
-  c[is.na(c)] <- 0
-  c[c > 1] <- 1
+  #####
+  b <- 2 * (1-a[,,3])
+  b[artifactMask>0] <- 0
+  b[lineMask==1] <- 0
+  
+  c <- b > 0.9
   
   kern <- makeBrush(3, shape='disc')
   d <- dilateGreyScale(c, kern)
   d <- erodeGreyScale(d, kern)
-  e <- d > 0.68
-
-  # Apply artifact mask for experiment and linemask for this frame
-  e[artifactMask>0] <- 0
-  e[lineMask==1] <- 0
   
-  # Remove small blobs
-  f <- removeBlobs(e<1, 25)
-  g <- removeBlobs(f<1, 25)
+#   f <- removeBlobs(d<1, 35)
+  g <- removeBlobs(d, 35)
   
-  print("Blob removal finished")
-  print(proc.time() - clock)
+  d <- dilateGreyScale(g, kern)
+  e <- d * (m < 0.5)
   
-  # Slightly dilate to join fragments together
-  kern <- makeBrush(3, shape='disc')
-  h <- dilateGreyScale(g, kern)
+#   f <- removeBlobs(e<1, 35)
+  g <- removeBlobs(e, 35)
   
-  return(h)
+  
+  ####
+  
+#   # few bacteria
+#   b <- a[,,4]
+#   c <- (b) * (1-m)
+#   c[is.na(c)] <- 0
+#   c[c > 1] <- 1
+#   
+#   kern <- makeBrush(3, shape='disc')
+#   d <- dilateGreyScale(c, kern)
+#   d <- erodeGreyScale(d, kern)
+#   e <- d > 0.68
+# 
+#   # Apply artifact mask for experiment and linemask for this frame
+#   e[artifactMask>0] <- 0
+#   e[lineMask==1] <- 0
+#   
+#   # Remove small blobs
+#   f <- removeBlobs(e<1, 25)
+#   g <- removeBlobs(f<1, 25)
+#   
+#   print("Blob removal finished")
+#   print(proc.time() - clock)
+#   
+#   # Slightly dilate to join fragments together
+#   kern <- makeBrush(3, shape='disc')
+#   h <- dilateGreyScale(g, kern)
+  
+  return(g)
   
 }
 
