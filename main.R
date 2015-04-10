@@ -61,27 +61,32 @@ isolateEarly <- function(m) {
   print(proc.time() - clock)
   
   # Create glcm masks
-  a <- glcm(m, n_grey=20, window=c(5,5), min_x=0, max_x=0.5, na_opt="any")
+  a <- glcm(m, n_grey=18, shift=list(c(0,1),c(1,0),c(1,1)), 
+            window=c(3,3), min_x=0, max_x=0.6,
+            statistics=c("dissimilarity"))
   
   print("glcm finished")
   print(proc.time() - clock)
   
   #####
-  b <- 2 * (1-a[,,3])
+  b <- (a[,,1]-m)
   b[artifactMask>0] <- 0
   b[lineMask==1] <- 0
   
-  c <- b > 0.9
+  c <- b > 0.5
   
   kern <- makeBrush(3, shape='disc')
   d <- dilateGreyScale(c, kern)
   d <- erodeGreyScale(d, kern)
   
 #   f <- removeBlobs(d<1, 35)
-  g <- removeBlobs(d, 35)
+  g <- removeBlobs(d, 50)
   
   d <- dilateGreyScale(g, kern)
-  e <- d * (m < 0.5)
+  e <- d * (m < 0.45)
+
+#   kern <- makeBrush(3, shape='disc')
+#   f <- dilateGreyScale(e, kern)
   
 #   f <- removeBlobs(e<1, 35)
   g <- removeBlobs(e, 35)
@@ -121,16 +126,16 @@ isolateEarly <- function(m) {
 
 
 
-test1 <- isolateEarly(frame02@.Data)
-test2 <- isolateEarly(frame03@.Data)
-test3 <- isolateEarly(frame04@.Data)
-test4 <- isolateEarly(frame05@.Data)
-test5 <- isolateEarly(frame06@.Data)
-test6 <- isolateEarly(frame07@.Data)
-test7 <- isolateEarly(frame08@.Data)
-test8 <- isolateEarly(frame09@.Data)
-test9 <- isolateEarly(frame10@.Data)
-test10 <- isolateEarly(frame11@.Data)
+test2 <- isolateEarly(frame02@.Data)
+test3 <- isolateEarly(frame03@.Data)
+test4 <- isolateEarly(frame04@.Data)
+test5 <- isolateEarly(frame05@.Data)
+test6 <- isolateEarly(frame06@.Data)
+test7 <- isolateEarly(frame07@.Data)
+test8 <- isolateEarly(frame08@.Data)
+test9 <- isolateEarly(frame09@.Data)
+test10 <- isolateEarly(frame10@.Data)
+test11 <- isolateEarly(frame11@.Data)
 
 
 
