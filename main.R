@@ -52,75 +52,36 @@ removeBlobs <- function(m, size) {
 # Returns a black and white mask of where bacteria can be found
 isolateEarly <- function(m) {
   
-  clock <- proc.time()
-  
   # Create mask of where dark lines are unlikely to contain bacteria
   lineMask <- darkLineMask(m)
-  
-  print("LineMask finished")
-  print(proc.time() - clock)
   
   # Create glcm masks
   a <- glcm(m, n_grey=18, shift=list(c(0,1),c(1,0),c(1,1)), 
             window=c(3,3), min_x=0, max_x=0.6,
             statistics=c("dissimilarity"))
-  
-  print("glcm finished")
-  print(proc.time() - clock)
-  
-  #####
+
+  # Dark out background and apply masks
   b <- (a[,,1]-m)
   b[artifactMask>0] <- 0
   b[lineMask==1] <- 0
   
+  # remove pixels over 50% value
   c <- b > 0.5
   
+  # Mild dilate/erode to close small gaps
   kern <- makeBrush(3, shape='disc')
   d <- dilateGreyScale(c, kern)
   d <- erodeGreyScale(d, kern)
   
-#   f <- removeBlobs(d<1, 35)
-  g <- removeBlobs(d, 50)
+  # Remove small blobs
+  e <- removeBlobs(d, 50)
   
-  d <- dilateGreyScale(g, kern)
-  e <- d * (m < 0.45)
+  # run dilate, mask, and remove smaller blobs
+  f <- dilateGreyScale(e, kern)
+  g <- f * (m < 0.45)
+  h <- removeBlobs(g, 35)  
 
-#   kern <- makeBrush(3, shape='disc')
-#   f <- dilateGreyScale(e, kern)
-  
-#   f <- removeBlobs(e<1, 35)
-  g <- removeBlobs(e, 35)
-  
-  
-  ####
-  
-#   # few bacteria
-#   b <- a[,,4]
-#   c <- (b) * (1-m)
-#   c[is.na(c)] <- 0
-#   c[c > 1] <- 1
-#   
-#   kern <- makeBrush(3, shape='disc')
-#   d <- dilateGreyScale(c, kern)
-#   d <- erodeGreyScale(d, kern)
-#   e <- d > 0.68
-# 
-#   # Apply artifact mask for experiment and linemask for this frame
-#   e[artifactMask>0] <- 0
-#   e[lineMask==1] <- 0
-#   
-#   # Remove small blobs
-#   f <- removeBlobs(e<1, 25)
-#   g <- removeBlobs(f<1, 25)
-#   
-#   print("Blob removal finished")
-#   print(proc.time() - clock)
-#   
-#   # Slightly dilate to join fragments together
-#   kern <- makeBrush(3, shape='disc')
-#   h <- dilateGreyScale(g, kern)
-  
-  return(g)
+  return(h)
   
 }
 
@@ -140,42 +101,48 @@ test11 <- isolateEarly(frame11@.Data)
 
 
 
-### TEST
-### Labeling images
-
-df <- data.frame(x=c(),y=c(),size=c(),stringsAsFactors=FALSE)
-x <- c()
-y <- c()
-z <- c()
-
-for (i in 1:max(m)) {
-  m <- bwlabel(m)
-  m1 <- m == i
-  t <- which(m1, arr.ind=T)
-  x <- c(x,mean(t[,1]))
-  y <- c(y,mean(t[,2]))
-  z <- c(z,sum(m1))
-}
 
 
-png("test.png",width=2149,height=1998)
-par(mar=c(0,0,0,0), oma=c(0,0,0,0))
-
-plot(x, y, pch=19, cex=z/max(z), type="n", axes=T, 
-     ylim=c(1998,1),xlim=c(1,2149),
-     xaxt="n", yaxt='n', xaxs='i', yaxs='i')
-
-for (i in 1:max(m)) {
-  text(x[[i]],y[[i]],z[[i]],cex=1)
-}
-
-dev.off()
 
 
-# [,,1] [,,2] [,,3] [,,4] are RGB Bl 
-labels <- readImage("test.png")
-labels <- 1-labels@.Data[,,1]
-
-
-display(labels + frame02@.Data)
+# 
+# 
+# ### TEST
+# ### Labeling images
+# 
+# df <- data.frame(x=c(),y=c(),size=c(),stringsAsFactors=FALSE)
+# x <- c()
+# y <- c()
+# z <- c()
+# 
+# for (i in 1:max(m)) {
+#   m <- bwlabel(m)
+#   m1 <- m == i
+#   t <- which(m1, arr.ind=T)
+#   x <- c(x,mean(t[,1]))
+#   y <- c(y,mean(t[,2]))
+#   z <- c(z,sum(m1))
+# }
+# 
+# 
+# png("test.png",width=2149,height=1998)
+# par(mar=c(0,0,0,0), oma=c(0,0,0,0))
+# 
+# plot(x, y, pch=19, cex=z/max(z), type="n", axes=T, 
+#      ylim=c(1998,1),xlim=c(1,2149),
+#      xaxt="n", yaxt='n', xaxs='i', yaxs='i')
+# 
+# for (i in 1:max(m)) {
+#   text(x[[i]],y[[i]],z[[i]],cex=1)
+# }
+# 
+# dev.off()
+# 
+# 
+# # [,,1] [,,2] [,,3] [,,4] are RGB Bl 
+# labels <- readImage("test.png")
+# labels <- 1-labels@.Data[,,1]
+# 
+# 
+# display(labels + frame02@.Data)
 
