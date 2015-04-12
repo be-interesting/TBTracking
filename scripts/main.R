@@ -45,5 +45,24 @@ test9 <- isolateBacteria(frame09@.Data)
 test10 <- isolateBacteria(frame10@.Data)
 test11 <- isolateBacteria(frame11@.Data)
 
+c2 <- getCentroids(test2)
+c3 <- getCentroids(test3)
+c4 <- getCentroids(test4)
+c5 <- getCentroids(test5)
+c6 <- getCentroids(test6)
+c7 <- getCentroids(test7)
+c8 <- getCentroids(test8)
+  
+g1 <- findSimilarGroups(c2,c3)
+g2 <- findSimilarGroups(c3,c4)
+g3 <- findSimilarGroups(c4,c5)
+g4 <- findSimilarGroups(c5,c6)
+g5 <- findSimilarGroups(c6,c7)
+g6 <- findSimilarGroups(c7,c8)
 
+m1 <- test2 %in% g1$b1
+m1 <- matrix(m1, nrow=2149, ncol=1998)
+
+m2 <- test3 %in% g1$b2
+m2 <- matrix(m2, nrow=2149, ncol=1998)
 

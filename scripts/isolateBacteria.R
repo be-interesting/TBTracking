@@ -30,6 +30,6 @@ isolateBacteria <- function(m) {
   g <- f * (m < 0.45)
   h <- removeBlobs(g, 35)  
   
-  return(h)
+  return(bwlabel(h))
   
 }
