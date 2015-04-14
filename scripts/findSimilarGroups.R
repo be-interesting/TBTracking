@@ -1,3 +1,6 @@
+# http://www.cs.princeton.edu/~schapire/talks/picasso-minicourse.pdf
+# logistic regression ?
+
 
 findSimilarGroups <- function(c1, c2) {
   
@@ -5,27 +8,50 @@ findSimilarGroups <- function(c1, c2) {
   len1 <- dim(c1)[[1]]
   len2 <- dim(c2)[[1]]
   
-  b1 <- character(len1*len2)
-  b2 <- character(len1*len2)
-  score <- numeric(len1*len2)
-  dist <- numeric(len1*len2)
+  b1 <- character(len1*len2)        # store index
+  b2 <- character(len1*len2)        # store index
+  score <- numeric(len1*len2)       # measurement of group fit
+  dist <- numeric(len1*len2)        # distance
+  id <- character(len1*len2)
+  growthAbs <- numeric(len1*len2)   # growth in pixels, -inf -> inf
+  growthRel <- numeric(len1*len2)   # percent difference in size, 0 -> 1
+  growthPer <- numeric(len1*len2)   # percent growth, 0 -> inf
   
-  for(i in 1:len1) {
-    for(j in 1:len2) {
-      index <- ((i-1) * len1) + j
-      b1[[index]] <- i
-      b2[[index]] <- j
-      dist[[index]] <- sqrt( (c1$x[[i]] - c2$x[[j]])^2 + (c1$y[[i]] - c2$y[[j]])^2 )
-      score[[index]] <- dist[[index]] ## / min(c2$size[[j]],c1$size[[i]]) / max(c2$size[[j]],c1$size[[i]])
+  i <- 0
+  for(ii in 1:len1) {
+    g1 <- c1[ii,]
+    for(jj in 1:len2) {
+      
+      g2 <- c2[jj,]
+      
+      i <- i + 1
+ 
+      b1[[i]] <- g1$index
+      b2[[i]] <- g2$index
+      
+      dist[[i]] <- sqrt( (g1$x - g2$x)^2 + (g1$y - g2$y)^2 )
+      
+      growthAbs[[i]] <- g2$size - g1$size     
+      growthRel[[i]] <- min(g1$size, g2$size)/max(g1$size, g2$size)
+      growthPer[[i]] <- g2$size / g1$size
+      
+      # We want the id from the FIRST frame
+      id[[i]] <- as.character(g1$id)
+      
+      score[[i]] <- 0.5^(dist[[i]]/10) * growthRel[[i]]^0.1
+      
     }
   }
   
-  sorted <- data.frame(b1=as.numeric(b1), b2=as.numeric(b2), dist=dist, score=score)
-  sorted <- sorted[score<15,]
-  sorted <- sorted[!is.na(sorted$score),]
-  sorted <- sorted[order(score),] # sort by score
+  sorted <- data.frame(b1=as.numeric(b1), b2=as.numeric(b2), dist=dist, 
+                       score=score, id=id, growthPer=growthPer, growthAbs=growthAbs)
+  
+  sorted <- sorted[!is.na(sorted$b1),]
+  sorted <- sorted[order(-sorted$score),] # sort by score
   sorted <- sorted[!duplicated(sorted$b1),]
   sorted <- sorted[!duplicated(sorted$b2),]
+  sorted <- sorted[sorted$growthPer < 1.5 & sorted$growthPer > 0.75,]
+  sorted <- sorted[sorted$dist < 20,]
 
   return(sorted)
 
