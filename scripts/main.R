@@ -61,38 +61,87 @@ g4 <- findSimilarGroups(c5,c6)
 g5 <- findSimilarGroups(c6,c7)
 g6 <- findSimilarGroups(c7,c8)
 
-# Initialize output
-output <- t(data.frame(c2$size,row.names=c2$id))
+
+# Updates a centroid dataframe with IDs that are determined to be
+# the same from the previous frame
+updateIDs <- function(c1, g) {
+
+  # select columns that continue between frame1 & 2
+  idList <- as.character(c1$id)
+  id1 <- as.character(g$id1)
+  id2 <- as.character(g$id2)
+  c1$id <- as.character(lapply(idList, function(x) if(x %in% id2) id1[which(id2==x)] else x))
+  
+  return(c1)
+}
+    
+
 
 # update the output with a new timestep and 
-updateOutput <- function(g, c1) {
+updateOutput <- function(c1, g) {
 
   # find 
-  newIDs <- c1[!(c1$id %in% g1$id),]
+  newIDs <- c1[!(c1$id %in% colnames(output)),]
   
   # Create empty dataframe for new IDs
   newIDs.df <- data.frame(t(data.frame(rep(NA,dim(newIDs)[[1]]))))
-  colnames(newIDs.df) <- discont$id
+  colnames(newIDs.df) <- newIDs$id
   
   # Bind current output with new IDs
   allIDs.df <- cbind(output, newIDs.df)
   
   # Create a new row with all of the new values
-  newRow <- data.frame(t(data.frame(g$growthAbs, row.names=g$id)))
+  newRow <- data.frame(t(data.frame(c1$size, row.names=c1$id)))
   
   # Add the new row with rbind.fill, which replaces missing values with NA
-  output <- rbind.fill(output, newRow)
+  return(rbind.fill(output, newRow))
 
 }
 
-test <- blah(g1,c2)
+
+
+
+
+# Initialize output
+c2 <- getCentroids(test2)
+output <- data.frame(t(data.frame(c2$size,row.names=c2$id)))
+
+# Step1
+c3 <- getCentroids(test3)
+g1 <- findSimilarGroups(c2,c3)
+c3 <- updateIDs(c3, g1)
+output <- updateOutput(c3, g1)
+
+# Step2
+c4 <- getCentroids(test4)
+g2 <- findSimilarGroups(c3,c4)
+c4 <- updateIDs(c4, g2)
+output <- updateOutput(c4, g2)
+
+# Step3
+c5 <- getCentroids(test5)
+g3 <- findSimilarGroups(c4,c5)
+c5 <- updateIDs(c5, g3)
+updateOutput(c5, g3)
+
+
+
+
+
+### TEST visually looking at continuations
 
 m1 <- test2 %in% g1$b1
 m1 <- matrix(m1, nrow=2149, ncol=1998)
-
 m2 <- test3 %in% g1$b2
 m2 <- matrix(m2, nrow=2149, ncol=1998)
 
+m3 <- test3 %in% g2$b1
+m3 <- matrix(m3, nrow=2149, ncol=1998)
+m4 <- test4 %in% g2$b2
+m4 <- matrix(m4, nrow=2149, ncol=1998)
+
 display(m1)
 display(m2)
+display(m3)
+display(m4)
 

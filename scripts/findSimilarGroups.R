@@ -12,7 +12,8 @@ findSimilarGroups <- function(c1, c2) {
   b2 <- character(len1*len2)        # store index
   score <- numeric(len1*len2)       # measurement of group fit
   dist <- numeric(len1*len2)        # distance
-  id <- character(len1*len2)
+  id1 <- character(len1*len2)
+  id2 <- character(len1*len2)
   growthAbs <- numeric(len1*len2)   # growth in pixels, -inf -> inf
   growthRel <- numeric(len1*len2)   # percent difference in size, 0 -> 1
   growthPer <- numeric(len1*len2)   # percent growth, 0 -> inf
@@ -36,7 +37,8 @@ findSimilarGroups <- function(c1, c2) {
       growthPer[[i]] <- g2$size / g1$size
       
       # We want the id from the FIRST frame
-      id[[i]] <- as.character(g1$id)
+      id1[[i]] <- as.character(g1$id)
+      id2[[i]] <- as.character(g2$id)
       
       score[[i]] <- 0.5^(dist[[i]]/10) * growthRel[[i]]^0.1
       
@@ -44,7 +46,8 @@ findSimilarGroups <- function(c1, c2) {
   }
   
   sorted <- data.frame(b1=as.numeric(b1), b2=as.numeric(b2), dist=dist, 
-                       score=score, id=id, growthPer=growthPer, growthAbs=growthAbs)
+                       score=score, id1=id1, id2=id2,
+                       growthPer=growthPer, growthAbs=growthAbs)
   
   sorted <- sorted[!is.na(sorted$b1),]
   sorted <- sorted[order(-sorted$score),] # sort by score
@@ -52,7 +55,10 @@ findSimilarGroups <- function(c1, c2) {
   sorted <- sorted[!duplicated(sorted$b2),]
   sorted <- sorted[sorted$growthPer < 1.5 & sorted$growthPer > 0.75,]
   sorted <- sorted[sorted$dist < 20,]
+  
+  ret <- data.frame(cbind(as.character(sorted$id1), as.character(sorted$id2), sorted$b1, sorted$b2))
+  colnames(ret) <- c("id1", "id2", "b1", "b2")
 
-  return(sorted)
+  return(ret)
 
 }
