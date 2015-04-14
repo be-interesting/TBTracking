@@ -1,6 +1,7 @@
 library(EBImage)
 library(glcm)
 library(plyr)
+library(RColorBrewer)
 
 source("scripts/createArtifactMask.R")
 source("scripts/darkLineMask.R")
@@ -78,7 +79,7 @@ updateIDs <- function(c1, g) {
 
 
 # update the output with a new timestep and 
-updateOutput <- function(c1, g) {
+updateOutput <- function(c1, g, output) {
 
   # find 
   newIDs <- c1[!(c1$id %in% colnames(output)),]
@@ -126,6 +127,66 @@ updateOutput(c5, g3)
 
 
 
+### Accepts a list of preprocessed frames
+### Returns a data frame of blob ids and pixel areas
+main <- function(frames) {
+  
+  if (length(frames) < 1) {
+    stop()
+  }
+  
+  print("Processing first frame...")
+  
+  # Process first frame
+#   firstFrame <- isolateBacteria(frames[[1]]@.Data)
+  firstFrame <- frames[[1]]
+  centroidsBefore <- getCentroids(firstFrame)
+  
+  # Initialize output
+  output <- data.frame(t(data.frame(centroidsBefore$size,row.names=centroidsBefore$id)))
+  
+  # Remove first frame
+  frames[[1]] <- NULL
+  
+  index <- 0
+  for (frame in frames) {
+    index <- index + 1
+    print(paste0("Processing frame ", index, " of ", length(frames)))
+    
+    # Process frame, extract centroids and size
+#     frame <- isolateBacteria(f@.Data)
+    
+    centroidsAfter <- getCentroids(frame)
+    
+    # Find groups that are determined to be the same between the two frames
+    groups <- findSimilarGroups(centroidsBefore,centroidsAfter)
+    
+    # For those continued group, give them the proper ID's from the previous frame
+    centroidsAfter <- updateIDs(centroidsAfter, groups)
+    output <- updateOutput(centroidsAfter, groups, output)
+    
+    # Reassign "before" centroids to the current frame
+    centroidsBefore <- centroidsAfter
+  }
+  
+  return(output)
+  
+}
+
+
+  
+
+### TEST this makes a cool graph
+test <- main(list(test2,test3,test4,test5,test6,test7))
+test <- test[,order(test[1,], test[2,], test[3,], test[4,], test[5,], test[6,]) ]
+cols <- brewer.pal(6,"Greens")
+plot(0,0,xlim=c(0,dim(test)[[2]]), ylim=c(0,max(test, na.rm=TRUE)))
+for (i in 1:dim(test)[[2]]) {
+  subset <- test[,i]
+  for (j in 1:length(subset)) {
+    points(i, subset[[j]], pch=19, cex=0.5, col=cols[[j]])
+  }
+}
 
 
 ### TEST visually looking at continuations

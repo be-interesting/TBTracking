@@ -6,6 +6,7 @@ getCentroids <- function(m) {
   y <- numeric(max(m))
   z <- numeric(max(m))
   id <- character(max(m))
+  index <- numeric(max(m))
   
   generateSeq <- function() {
     x <- floor(runif(10,1,26.9))
