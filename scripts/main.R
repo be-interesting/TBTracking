@@ -20,7 +20,7 @@ frame01 <- rotate(readImage("examples/set_3/frame01.tif"),0.5)
 # artifactMask <- artifactMask < 1 # invert
 
 # Save it
-writeImage(artifactMask, "examples/artifactMask.tiff")
+# writeImage(artifactMask, "examples/artifactMask.tiff")
 artifactMask <- readImage("examples/artifactMask.tiff")
 
 # Load sample data
@@ -96,9 +96,11 @@ main <- function(frames) {
   
 
 ### TEST this makes a cool graph
-test <- main(list(test2,test3,test4,test5,test6,test7))
-test <- test[,order(test[1,], test[2,], test[3,], test[4,], test[5,], test[6,]) ]
-cols <- brewer.pal(6,"Greens")
+test <- main(list(test2,test3,test4,test5,test6,test7,test8,test9,test10,test11))
+test <- test[,order(test[3,], test[4,], test[5,], 
+                    test[6,], test[7,], test[8,], test[9,], test[10,]) ]
+test <- test[,!is.na(test[2,])]
+cols <- brewer.pal(10,"Greens")
 plot(0,0,log="y",xlim=c(1,dim(test)[[2]]), ylim=c(log(min(test,na.rm=TRUE)),log(max(test, na.rm=TRUE))))
 for (i in 1:dim(test)[[2]]) {
   subset <- test[,i]
@@ -107,6 +109,20 @@ for (i in 1:dim(test)[[2]]) {
   }
 }
 
+
+
+### TEST a different kind of plot
+
+plot(0,0,log="y",xlim=c(1,dim(test)[[2]]), ylim=c(log(min(test,na.rm=TRUE)),log(max(test, na.rm=TRUE))))
+for (i in 1:dim(test)[[2]]) {
+  subset <- log(test[,i])
+  diffs <- diff(subset)
+  for (j in 1:(length(subset)-1)) {
+    y <- c(subset[[j]],subset[[j+1]])
+    lines(c(i,i),y, pch=19, cex=0.5, col=cols[[j]], lwd=3)
+  }
+#   lines(c(i,i), c(min(subset, na.rm=TRUE),max(subset, na.rm=TRUE)))
+}
 
 
 
