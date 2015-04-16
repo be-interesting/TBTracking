@@ -16,7 +16,7 @@ appendOutput <- function(c1, g, output) {
   newRow <- data.frame(t(data.frame(c1$size, row.names=c1$id)))
   
   # Add the new row with rbind.fill, which replaces missing values with NA
-  return(rbind.fill(output, newRow))
+  return(plyr::rbind.fill(output, newRow))
   
 }
 

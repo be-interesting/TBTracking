@@ -96,7 +96,7 @@ main <- function(frames) {
   
 
 ### TEST this makes a cool graph
-test <- main(list(test2,test3,test4,test5,test6,test7,test8,test9,test10,test11))
+test <- main(list(test2,test3,test4,test5))
 test <- test[,order(test[3,], test[4,], test[5,], 
                     test[6,], test[7,], test[8,], test[9,], test[10,]) ]
 test <- test[,!is.na(test[2,])]
