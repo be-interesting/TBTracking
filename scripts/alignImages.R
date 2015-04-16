@@ -1,26 +1,29 @@
-frame01 <- rotate(readImage("examples/full/frame01.tif"),0.5)
-frame02 <- rotate(readImage("examples/full/frame02.tif"),0.5)
-frame03 <- rotate(readImage("examples/full/frame03.tif"),0.5)
-frame04 <- rotate(readImage("examples/full/frame04.tif"),0.5)
 
-images <- list(frame01, frame02, frame03, frame04)
+processFile <- function(file) {
+  file <- rotate(readImage(paste0("examples/full/",file),),0.5)@.Data
+  file <- file * 1/max(file)
+  return(file)
+}
+
+# Load and process all files in the given directory
+files <- list.files("examples/full")
+images <- lapply(files, processFile)
+
 
 
 alignImages <- function(images) {
-  
-  for(i in 1:length(images)) {
-    images[[i]] <- images[[i]]@.Data * 1/max(images[[i]])
-  }
-  
+
   background <- images[[1]]
   
   x1 <- 1800
   y1 <- 250
-  wh <- 300
+  wh <- 150
   
   bgSample <- background[x1:(x1+wh), y1:(y1+wh)]
   
   for (i in 2:length(images)) {
+    
+    print(paste0("Aligning frame ", i))
     
     image <- images[[i]]@.Data
   
@@ -48,4 +51,21 @@ alignImages <- function(images) {
   background <- background[150:(dim(background)[[1]]-150),
                            150:(dim(background)[[2]]-150)]
   
+  images[[1]] <- background
+  
+  return(images)
+  
 }
+
+images <- alignImages(images)
+lapply(images, display)
+
+
+### TEMPORARY 
+### Subset and save these images
+
+saveSmallSubset <- function(image, filename) {
+  writeImage(image[1400:1700,1000:1300], paste0("examples/set_3/", filename))
+}
+
+lapply(images, saveSmallSubset)
