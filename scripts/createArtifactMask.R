@@ -100,11 +100,11 @@ createArtifactMask <- function(bg) {
   
   # create a texture mask
   # use the contrast statistic (layer 5)
-  a <- glcm(bg, n_grey=10)[,,5]
+  a <- glcm(bg, n_grey=10)[,,3]
   
   # dilate and erode to close gaps in the middle of circles
   kern <- makeBrush(23, shape='disc')
-  b <- dilateGreyScale(a>0.9, kern)
+  b <- dilateGreyScale(a<0.5, kern)
   c <- erodeGreyScale(b, kern)
   
   # add the square mask
@@ -116,7 +116,7 @@ createArtifactMask <- function(bg) {
   e <- erodeGreyScale(d, kern)
   
   # Expand the circles a bit
-  kern <- makeBrush(5, shape='disc')
+  kern <- makeBrush(3, shape='disc')
   e <- dilateGreyScale(e, kern)
   
   f <- e

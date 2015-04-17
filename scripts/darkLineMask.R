@@ -4,45 +4,76 @@
 
 darkLineMask <- function(df) {
   
+  lineMask <- df
+  lineMask.inverse <- df
+  
   # Iterate through the imagine in 15 pixel rows and find the mean of each row
   meanValue <- c()
-  for(y in seq(15,(dim(df)[[2]]-15),2)) {
-    sample <- df[ ,y:(y+14)]
+  for(y in seq(1,(dim(df)[[2]]-5),1)) {
+    sample <- df[ ,y:(y+5)]
     meanValue <- c(meanValue, mean(sample))
   }
   
-  # Search through the mean values in groups of 100 and save the index of the
-  # max value IF the value is over 0.7
-  indices <- c()
-  for(i in seq(1,length(meanValue)-100,by=100)) {
-    subset <- meanValue[i:(i+99)]
-    if(max(subset) > 0.7) {
-      indices <- c(indices,(which.max(subset)+i)*2)
-    }
-  }
+  d.start <- which(diff(meanValue < 0.33) > 0)
+  d.end <- which(diff(meanValue < 0.33) < 0) + 5
+  d.range <- cbind(d.start, d.end)
   
-  # For each of these high points, mask the background and save the bacter
-  for (i in indices) {
+  l.start <- which(diff(meanValue > 0.6) > 0)
+  l.end <- which(diff(meanValue > 0.6) < 0)
+  l.range <- cbind(l.start, l.end)
+  
+  # For each of these low points, mask the background and save the bacteria
+  for (i in 1:dim(d.range)[[1]]) {
     
-    y1 <- i-11
-    y2 <- i+13
+    y1 <- d.range[i,1]
+    y2 <- d.range[i,2]
     
     sample <- df[ ,y1:y2]
     
     a <- glcm(sample, shift=list(c(-1,0),c(1,0)), window=c(3,3), min_x=0, max_x=0.5, na_opt="ignore")
-    b <- a[,,3] < 0.45
+    b <- (a[,,3] < 0.4)
+    b[sample > 0.35] <- 0
 
     kern <- makeBrush(7, shape='disc')
     dilated <- dilateGreyScale(b, kern)
     eroded <- erodeGreyScale(dilated, kern)
+    
+    eroded[sample > 0.35] <- 0
 
     mask <- eroded
     
-    df[ ,y1:y2] <- mask * df[ ,y1:y2]
-#     df[ ,(i-1):(i+13)] <- mask * df[ ,(i-1):(i+13)]
+    lineMask[ ,y1:y2] <- mask * lineMask[ ,y1:y2]
+    lineMask.inverse[ ,y1:y2] <- !mask * lineMask.inverse[ ,y1:y2]
 
   }
+  
+  for (i in 1:dim(l.range)[[1]]) {
+    
+    y1 <- l.range[i,1]
+    y2 <- l.range[i,2]
+    
+    sample <- df[ ,y1:y2]
+    
+    a <- glcm(sample, shift=list(c(1,0)), window=c(3,3), min_x=0, max_x=1, na_opt="ignore")
+    
+    b <- a[,,3] < 0.5
+    
+    kern <- makeBrush(7, shape='disc')
+    dilated <- dilateGreyScale(b, kern)
+    eroded <- erodeGreyScale(dilated, kern)
+    
+    eroded[sample > 0.6] <- 0
+    
+    mask <- eroded
+    
+    lineMask[ ,y1:y2] <- mask * lineMask[ ,y1:y2]
+    lineMask.inverse[ ,y1:y2] <- !mask * lineMask.inverse[ ,y1:y2]
+    
+  }
 
-  return(df==0)
+  return(list(
+    normal=lineMask==0,
+    inverse=lineMask.inverse==0
+  ))
 
 }
