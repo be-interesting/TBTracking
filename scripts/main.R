@@ -19,7 +19,7 @@ source("scripts/updateCentroidIDs.R")
 main <- function(dataDir="examples/set_2", n) {
   
   # Load frames
-  frames <- loadFrames(dataDir, 20)
+  frames <- loadFrames(dataDir)
   
   # Create artifact mask
   artifactMask <- createArtifactMask(frames[[1]]@.Data)

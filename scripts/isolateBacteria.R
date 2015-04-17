@@ -1,5 +1,5 @@
 # Returns a black and white mask of where bacteria can be found
-isolateBacteriaOld <- function(m) {
+isolateBacteria <- function(m) {
   
   # Create mask of where dark lines are unlikely to contain bacteria
   lineMasks <- darkLineMask(m)
@@ -31,12 +31,14 @@ isolateBacteriaOld <- function(m) {
   
   # Remove small blobs
   e <- removeBlobs(d, 50)
+
+  e[a[,,3]>0.75] <- 0
   
   kern <- makeBrush(5, shape='disc')
   # run dilate, mask, and remove smaller blobs
   f <- dilateGreyScale(e, kern)
   f <- erodeGreyScale(f, kern)
-  g <- f * (m < 0.4)
+  g <- f * (m < 0.45)
   h <- removeBlobs(g, 15)  
   
   return(bwlabel(h))
@@ -46,7 +48,7 @@ isolateBacteriaOld <- function(m) {
 
 
 
-isolateBacteria <- function(m) {  
+isolateBacteriaOff <- function(m) {  
   
   # Create mask of where dark lines are unlikely to contain bacteria
   lineMasks <- darkLineMask(m)
