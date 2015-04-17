@@ -19,7 +19,7 @@ darkLineMask <- function(df) {
   d.range <- cbind(d.start, d.end)
   
   l.start <- which(diff(meanValue > 0.6) > 0)
-  l.end <- which(diff(meanValue > 0.6) < 0)
+  l.end <- which(diff(meanValue > 0.6) < 0) + 10
   l.range <- cbind(l.start, l.end)
   
   # For each of these low points, mask the background and save the bacteria
