@@ -87,7 +87,7 @@ processImages <- function(images, sample=c(1800,250,150)) {
 # }
 # 
 # lapply(images, saveSmallSubset)
-
+# 
 # for (i in 1:length(images)) {
 #   im <- images[[i]][1020:1620,480:1080]
 #   writeImage(im, paste0("examples/set_2/", LETTERS[i], ".tif"))
