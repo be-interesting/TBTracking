@@ -3,15 +3,24 @@
 # Arguments: list of images to be aligned, sample space to align to (x,y,side length)
 processImages <- function(images, sample=c(1800,250,150)) {
   
+    normalizeValue <- function(m) {      
+      # brighten
+      m <- m / max(m)
+
+      return(m)
+    }
+  
+    x1 <- sample[[1]]
+    y1 <- sample[[2]]
+    wh <- sample[[3]]
+  
     # Adjust image brightness
-    images <- lapply(images, function(x) x / max(x))
+    images <- lapply(images, normalizeValue)
     
     # Get background region
     bgSample <- images[[1]][x1:(x1+wh), y1:(y1+wh)]
     
-    x1 <- sample[[1]]
-    y1 <- sample[[2]]
-    wh <- sampme[[3]]
+    
     
     for (i in 2:length(images)) {
       
@@ -48,6 +57,8 @@ processImages <- function(images, sample=c(1800,250,150)) {
       
     }
     
+    background <- images[[1]]
+    
     # Crop background
     background <- background[150:(dim(background)[[1]]-150),
                              150:(dim(background)[[2]]-150)]
@@ -72,7 +83,12 @@ processImages <- function(images, sample=c(1800,250,150)) {
 # ### Subset and save these images
 # 
 # saveSmallSubset <- function(image, filename) {
-#   writeImage(image[1400:1700,1000:1300], paste0("examples/set_3/", filename))
+#   writeImage(image[1020:1620,480:1080], paste0("examples/set_2/", filename))
 # }
 # 
 # lapply(images, saveSmallSubset)
+
+# for (i in 1:length(images)) {
+#   im <- images[[i]][1020:1620,480:1080]
+#   writeImage(im, paste0("examples/set_2/", LETTERS[i], ".tif"))
+# }

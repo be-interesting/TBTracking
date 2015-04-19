@@ -14,12 +14,12 @@ darkLineMask <- function(df) {
     meanValue <- c(meanValue, mean(sample))
   }
   
-  d.start <- which(diff(meanValue < 0.33) > 0)
-  d.end <- which(diff(meanValue < 0.33) < 0) + 5
+  d.start <- which(diff(meanValue < 0.55) > 0) - 5
+  d.end <- which(diff(meanValue < 0.55) < 0) + 5
   d.range <- cbind(d.start, d.end)
   
-  l.start <- which(diff(meanValue > 0.6) > 0)
-  l.end <- which(diff(meanValue > 0.6) < 0) + 10
+  l.start <- which(diff(meanValue > 1.4) > 0)
+  l.end <- which(diff(meanValue > 1.4) < 0) + 10
   l.range <- cbind(l.start, l.end)
   
   # For each of these low points, mask the background and save the bacteria
@@ -30,15 +30,16 @@ darkLineMask <- function(df) {
     
     sample <- df[ ,y1:y2]
     
-    a <- glcm(sample, shift=list(c(-1,0),c(1,0)), window=c(3,3), min_x=0, max_x=0.5, na_opt="ignore")
+    a <- glcm(sample, shift=list(c(-1,0),c(1,0)), window=c(3,3), min_x=0, max_x=1, na_opt="ignore")
     b <- (a[,,3] < 0.4)
-    b[sample > 0.35] <- 0
+    b[sample > 0.65] <- 0
 
-    kern <- makeBrush(7, shape='disc')
+    kern <- makeBrush(9, shape='disc')
     dilated <- dilateGreyScale(b, kern)
+    kern <- makeBrush(7, shape='disc')
     eroded <- erodeGreyScale(dilated, kern)
     
-    eroded[sample > 0.35] <- 0
+    eroded[sample > 0.55] <- 0
 
     mask <- eroded
     
@@ -53,18 +54,22 @@ darkLineMask <- function(df) {
     y2 <- l.range[i,2]
     
     sample <- df[ ,y1:y2]
-    
-    a <- glcm(sample, shift=list(c(1,0)), window=c(3,3), min_x=0, max_x=1, na_opt="ignore")
-    
-    b <- a[,,3] < 0.5
-    
-    kern <- makeBrush(7, shape='disc')
-    dilated <- dilateGreyScale(b, kern)
-    eroded <- erodeGreyScale(dilated, kern)
-    
-    eroded[sample > 0.6] <- 0
-    
-    mask <- eroded
+#     
+    a <- glcm(sample, shift=list(c(1,0)), window=c(3,3), min_x=0, max_x=1, na_opt="ignore",
+              statistics=c("homogeneity"))
+
+    mask <- (a[,,1] * sample) < 0.4
+    mask[is.na(mask)] <- 0
+#     
+#     b <- a[,,3] < 0.3
+#     
+#     kern <- makeBrush(7, shape='disc')
+#     dilated <- dilateGreyScale(b, kern)
+#     eroded <- erodeGreyScale(dilated, kern)
+#     
+#     eroded[sample > 0.6] <- 0
+#     
+#     mask <- eroded
     
     lineMask[ ,y1:y2] <- mask * lineMask[ ,y1:y2]
     lineMask.inverse[ ,y1:y2] <- !mask * lineMask.inverse[ ,y1:y2]
