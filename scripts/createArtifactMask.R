@@ -123,7 +123,7 @@ createArtifactMask <- function(bg) {
   ### REMOVE WHITE LINES ###
   for(y in seq(5,dim.y-20,by=2)) {
     sample <- e[,y:(y+5)]
-    if( sum(sample) / (dim.y*6) > 0.8) {
+    if( sum(sample) / (dim.x*6) > 0.8) {
       f[,(y-5):(y+20)] <- 0
     }
   }
