@@ -19,13 +19,56 @@ source("scripts/updateCentroidIDs.R")
 main <- function(dataDir="examples/set_2", n) {
   
   # Load frames
-  frames <- loadFrames(dataDir, n=20)
+  frames <- loadFrames(dataDir, n=25)
   
   # Create artifact mask
   artifactMask <- createArtifactMask(frames[[1]]@.Data)
   
   frames.labeled <- lapply(frames, isolateBacteria)
-#   
+  
+  firstFrame <- frames.labeled[[2]]
+  centroidsBefore <- getCentroids(firstFrame)
+  
+  output <- data.frame(t(data.frame(centroidsBefore$size,row.names=centroidsBefore$id)))
+  
+  saved <- vector("list", length(frames.labeled))
+  saved[[2]] <- centroidsBefore
+  
+  for (i in 3:length(frames.labeled)) {
+  
+    
+    frame <- frames.labeled[[i]]
+    
+    print(paste0("Processing frame ", i, " of ", length(frames)))
+    
+    centroidsAfter <- getCentroids(frame)
+    
+    
+    # Find groups that are determined to be the same between the two frames
+    groups <- findSimilarGroups(centroidsBefore,centroidsAfter)
+    
+    # For those continued group, give them the proper ID's from the previous frame
+    centroidsAfter <- updateCentroidIDs(centroidsAfter, groups)
+    output <- appendOutput(centroidsAfter, groups, output)
+    
+    saved[[i]] <- centroidsAfter
+    
+    # Reassign "before" centroids to the current frame
+    centroidsBefore <- centroidsAfter
+    
+  }
+  
+  
+  # A neat plot
+  save <- output
+  output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 5)]
+  
+  plot(log(output[,1]), log="y", type="n", ylim=c(log(min(output,na.rm=TRUE)),log(max(output, na.rm=TRUE))), xlim=c(0,25),
+       xlab="timestep", ylab="log(size)")
+  lapply(log(output), lines, lwd=2, col=rgb(0,0,0,0.4))
+  
+}
+  
 #   i <- 0
 #   for (frame in frames.labeled) {
 #     i <- i+1
@@ -39,54 +82,17 @@ main <- function(dataDir="examples/set_2", n) {
 #     writeImage(frame,paste0("frames2/",i,".tif"))    
 #     Sys.sleep(0.3)
 #   }
-#   
   
-}
-
-
-### Accepts a list of preprocessed frames
-### Returns a data frame of blob ids and pixel areas
-main <- function(frames) {
   
-  if (length(frames) < 1) {
-    stop()
+showChanges <- function(id, frames, centroids) {
+  
+  for (i in 2:length(frames)) {
+    if (sum(centroids[[i]]$id == id) > 0) {
+      label <- which(centroids[[i]]$id == id)
+      display(frames[[i]] == label)
+      Sys.sleep(0.1)
+    }
   }
-  
-  print("Processing first frame...")
-  
-  # Process first frame
-  firstFrame <- frames[[1]]
-  centroidsBefore <- getCentroids(firstFrame)
-  
-  # Initialize output
-  output <- data.frame(t(data.frame(centroidsBefore$size,row.names=centroidsBefore$id)))
-  
-  # Remove first frame
-  frames[[1]] <- NULL
-  
-  index <- 0
-  for (frame in frames) {
-    index <- index + 1
-    print(paste0("Processing frame ", index, " of ", length(frames)))
-    
-    centroidsAfter <- getCentroids(frame)
-    
-    # Find groups that are determined to be the same between the two frames
-    groups <- findSimilarGroups(centroidsBefore,centroidsAfter)
-    
-    # For those continued group, give them the proper ID's from the previous frame
-    centroidsAfter <- updateCentroidIDs(centroidsAfter, groups)
-    output <- appendOutput(centroidsAfter, groups, output)
-    
-    # Reassign "before" centroids to the current frame
-    centroidsBefore <- centroidsAfter
-  }
-  
-  return(output)
-  
 }
-
-
-
 
   

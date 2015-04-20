@@ -18,8 +18,8 @@ darkLineMask <- function(df) {
   d.end <- which(diff(meanValue < 0.55) < 0) + 5
   d.range <- cbind(d.start, d.end)
   
-  l.start <- which(diff(meanValue > 1.4) > 0)
-  l.end <- which(diff(meanValue > 1.4) < 0) + 10
+  l.start <- which(diff(meanValue > 1.45) > 0)
+  l.end <- which(diff(meanValue > 1.45) < 0) + 10
   l.range <- cbind(l.start, l.end)
   
   if((length(d.range) + length(l.range)) < 1) {

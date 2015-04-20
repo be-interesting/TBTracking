@@ -1,6 +1,8 @@
 # Returns a black and white mask of where bacteria can be found
 isolateBacteria <- function(m) {
   
+  print("Searching new frame...")
+  
   # normalize
   m <- m * 0.5/mean(m)
   # increase contrast
@@ -28,18 +30,17 @@ isolateBacteria <- function(m) {
   b[artifactMask>0] <- 0
   b[lineMasks$normal==1] <- 0
   
-  kern <- makeBrush(9, shape='disc')
+  kern <- makeBrush(11, shape='disc')
   d <- dilateGreyScale(b, kern)
-  kern <- makeBrush(9, shape='disc')
   d <- erodeGreyScale(d, kern)
   
   e <- removeBlobs(d, 50)
   
-  e[m > 0.7] <- 0
+  e[m > 0.75] <- 0
   
   e <- removeBlobs(e, 25)
 
-  return(e)
+  return(bwlabel(e))
   
 }
 
