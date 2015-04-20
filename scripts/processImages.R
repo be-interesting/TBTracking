@@ -1,12 +1,12 @@
 # Aligns, and recolors all of the .tif images in a folder
 # Assumes that the first frame is a background image
 # Arguments: list of images to be aligned, sample space to align to (x,y,side length)
-processImages <- function(images, sample=c(1800,250,150)) {
+processImages <- function(images, sample=c(150,250,150)) {
   
     normalizeValue <- function(m) {      
       # brighten
       m <- m / max(m)
-
+      m <- rotate(m, 0.5)
       return(m)
     }
   
@@ -89,6 +89,6 @@ processImages <- function(images, sample=c(1800,250,150)) {
 # lapply(images, saveSmallSubset)
 # 
 # for (i in 1:length(images)) {
-#   im <- images[[i]][1020:1620,480:1080]
+#   im <- images[[i]][1060:2272,455:1104]
 #   writeImage(im, paste0("examples/set_2/", LETTERS[i], ".tif"))
 # }
