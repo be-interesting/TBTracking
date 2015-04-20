@@ -25,21 +25,21 @@ main <- function(dataDir="examples/set_2", n) {
   artifactMask <- createArtifactMask(frames[[1]]@.Data)
   
   frames.labeled <- lapply(frames, isolateBacteria)
-  
-  i <- 0
-  for (frame in frames.labeled) {
-    i <- i+1
-    writeImage(frame,paste0("frames1/",i,".tif"))    
-    Sys.sleep(0.3)
-  }
-  
-  i <- 0
-  for (frame in frames) {
-    i <- i+1
-    writeImage(frame,paste0("frames2/",i,".tif"))    
-    Sys.sleep(0.3)
-  }
-  
+#   
+#   i <- 0
+#   for (frame in frames.labeled) {
+#     i <- i+1
+#     writeImage(frame,paste0("frames1/",i,".tif"))    
+#     Sys.sleep(0.3)
+#   }
+#   
+#   i <- 0
+#   for (frame in frames) {
+#     i <- i+1
+#     writeImage(frame,paste0("frames2/",i,".tif"))    
+#     Sys.sleep(0.3)
+#   }
+#   
   
 }
 

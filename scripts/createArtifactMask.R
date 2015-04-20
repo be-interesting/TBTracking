@@ -86,10 +86,10 @@ createArtifactMask <- function(bg) {
           # create a square mask. the mask is a little smaller than the sample
           # because I only want to remove the dark parts
           sq.mask <- matrix(0, sq.x, sq.y)
-          sq.mask[1:6, ] <- 1
-          sq.mask[(sq.x-6):sq.x, ] <- 1
-          sq.mask[,1:6] <- 1
-          sq.mask[,(sq.y-6):sq.y] <- 1
+          sq.mask[1:10, ] <- 1
+          sq.mask[(sq.x-10):sq.x, ] <- 1
+          sq.mask[,1:10] <- 1
+          sq.mask[,(sq.y-10):sq.y] <- 1
           output[x:(x+(sq.x-1)),y:(y+sq.y-1)] <- output[x:(x+(sq.x-1)),y:(y+sq.y-1)] * sq.mask
         }
         

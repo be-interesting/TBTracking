@@ -53,8 +53,8 @@ findSimilarGroups <- function(c1, c2) {
   sorted <- sorted[order(-sorted$score),] # sort by score
   sorted <- sorted[!duplicated(sorted$b1),]
   sorted <- sorted[!duplicated(sorted$b2),]
-#   sorted <- sorted[sorted$growthPer < 1.5 & sorted$growthPer > 0.75,]
-#   sorted <- sorted[sorted$dist < 20,]
+  sorted <- sorted[sorted$growthPer < 1.4 & sorted$growthPer > 0.9,]
+  sorted <- sorted[sorted$dist < 30,]
   
   ret <- data.frame(cbind(as.character(sorted$id1), as.character(sorted$id2), sorted$b1, sorted$b2))
   colnames(ret) <- c("id1", "id2", "b1", "b2")
