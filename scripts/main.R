@@ -19,12 +19,14 @@ source("scripts/updateCentroidIDs.R")
 main <- function(dataDir="examples/set_2", n) {
   
   # Load frames
-  frames <- loadFrames(dataDir, n=25)
+  frames <- loadFrames(dataDir, n=20)
   
   # Create artifact mask
   artifactMask <- createArtifactMask(frames[[1]]@.Data)
   
   frames.labeled <- lapply(frames, isolateBacteria)
+  
+  
   
   firstFrame <- frames.labeled[[2]]
   centroidsBefore <- getCentroids(firstFrame)
@@ -61,11 +63,12 @@ main <- function(dataDir="examples/set_2", n) {
   
   # A neat plot
   save <- output
-  output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 5)]
+  output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 10)]
   
   plot(log(output[,1]), log="y", type="n", ylim=c(log(min(output,na.rm=TRUE)),log(max(output, na.rm=TRUE))), xlim=c(0,25),
        xlab="timestep", ylab="log(size)")
   lapply(log(output), lines, lwd=2, col=rgb(0,0,0,0.4))
+  lapply(log(output), points, col=rgb(0,0,0,0.3), cex=0.6, pch=19)
   
 }
   
@@ -83,16 +86,25 @@ main <- function(dataDir="examples/set_2", n) {
 #     Sys.sleep(0.3)
 #   }
   
-  
+
+
+# For a given id, "display" each frame that contains that id
 showChanges <- function(id, frames, centroids) {
-  
   for (i in 2:length(frames)) {
     if (sum(centroids[[i]]$id == id) > 0) {
       label <- which(centroids[[i]]$id == id)
       display(frames[[i]] == label)
-      Sys.sleep(0.1)
+      Sys.sleep(0.05)
     }
   }
 }
 
-  
+showChanges(colnames(output)[[24]], frames.labeled, saved)
+
+# Look at each line individually
+for (i in 1:dim(output)[[2]]) {
+  print(i)
+  plot(log(output[,i]), log="y", type="l", ylim=c(log(min(output,na.rm=TRUE)),log(max(output, na.rm=TRUE))),
+       xlim=c(0,25),xlab="timestep", ylab="log(size)")
+  Sys.sleep(1)
+}  
