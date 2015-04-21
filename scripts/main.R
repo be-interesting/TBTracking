@@ -16,20 +16,27 @@ source("scripts/updateCentroidIDs.R")
 
 # Generate output for a given folder
 # Optional: if n, only process that many images
-main <- function(dataDir="examples/set_2", n) {
+main <- function(dataDir="examples/set_3", n) {
   
   # Load frames
   frames <- loadFrames(dataDir, n=20)
   
   # Create artifact mask
+  ptm <- proc.time()
   artifactMask <- createArtifactMask(frames[[1]]@.Data)
+  print(proc.time() - ptm)
   
   frames.labeled <- lapply(frames, isolateBacteria)
   
-  
-  
+  temp <- function(x) {
+    x[artifactMask==1] <- 0
+    x <- removeBlobs(x, 10)
+    return(x)
+  }
+
   firstFrame <- frames.labeled[[2]]
   centroidsBefore <- getCentroids(firstFrame)
+  centroidsBefore <- centroidsBefore[!(round(centroidsBefore$y) %in% c(seq(690,747),seq(1586,1654))),]
   
   output <- data.frame(t(data.frame(centroidsBefore$size,row.names=centroidsBefore$id)))
   
@@ -38,13 +45,14 @@ main <- function(dataDir="examples/set_2", n) {
   
   for (i in 3:length(frames.labeled)) {
     
+    ptm <- proc.time()
     
     frame <- frames.labeled[[i]]
     
     print(paste0("Processing frame ", i, " of ", length(frames)))
     
     centroidsAfter <- getCentroids(frame)
-    
+    centroidsAfter <- centroidsAfter[!(round(centroidsAfter$y) %in% c(seq(690,747),seq(1586,1654))),]
     
     # Find groups that are determined to be the same between the two frames
     groups <- findSimilarGroups(centroidsBefore,centroidsAfter)
@@ -58,12 +66,14 @@ main <- function(dataDir="examples/set_2", n) {
     # Reassign "before" centroids to the current frame
     centroidsBefore <- centroidsAfter
     
+    print(proc.time() - ptm)
+    
   }
   
   
   # A neat plot
   save <- output
-  output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 8)]
+  output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 10)]
   
   plot(log(output[,1]), log="y", type="n", ylim=c(log(min(output,na.rm=TRUE)),log(max(output, na.rm=TRUE))), xlim=c(1,20),
        xlab="timestep", ylab="log(size)")

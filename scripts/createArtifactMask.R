@@ -38,7 +38,7 @@ createArtifactMask <- function(bg) {
   sq.row <- diff(apply(bg,2,sd) > 0.2)
   sq.row.start <- which(sq.row==1)
   
-  sq.col <- diff(apply(bg,1,sd) > 0.18)
+  sq.col <- diff(apply(bg,1,sd) > 0.17)
   sq.col.start <- which(sq.col==1)
   
   # Expand the search range a little bit
@@ -82,7 +82,7 @@ createArtifactMask <- function(bg) {
         # rules that squares tend to follow
         if (isDarker(y12,y11) & isDarker(y22,y21) 
             & isDarker(x12, x11) & isDarker(x22, x21)
-            & percentDark(center) < 0.3) {
+            & percentDark(center) < 0.4) {
           # create a square mask. the mask is a little smaller than the sample
           # because I only want to remove the dark parts
           sq.mask <- matrix(0, sq.x, sq.y)
