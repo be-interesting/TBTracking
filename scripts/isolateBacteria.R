@@ -4,33 +4,34 @@ isolateBacteria <- function(m) {
   print("Searching new frame...")
   ptm <- proc.time()
   
-  # normalize
-  m <- m * 0.5/mean(m)
-  # increase contrast
-  m <- (0.4 + m)^3
+  #   # normalize
+  #   m <- m * 0.5/mean(m)
+  #   # increase contrast
+  #   m <- (0.4 + m)^3
   
-  m <- equalize(m, c(min(m), max(m)), 250)
+#   m <- frames[[18]]
+  n <- m
   
+  # Equalize histogram
+  m <- equalize(m) ^ mean(m)
   
-  # Create mask of where dark lines are unlikely to contain bacteria
-#   lineMasks <- darkLineMask(m)
-  # Darken areas not in the line mask
-#   m[lineMasks$inverse] <- m[lineMasks$inverse] / 3
+  # Gamma correction
+  #   m <- equalize(m*n) ^ 0.5
   
   # Create glcm masks
   a <- glcm(m, n_grey=15, shift=list(c(1,1)), 
-            window=c(3,3), min_x=0, max_x=max(m), statistics=c("homogeneity"))
+            window=c(3,3), min_x=0, max_x=max(m))
   
   #??????
   b <- m * (m + a[,,1])
   
   c <- glcm(b, n_grey=15, shift=list(c(1,1)), 
-            window=c(3,3), min_x=0, max_x=0.5, statistics=c("dissimilarity"))
+            window=c(3,3), min_x=0, max_x=0.3, statistics=c("dissimilarity"))
   
   b <- c[,,1] > 0.5
   
   b[artifactMask>0] <- 0
-#   b[lineMasks$normal==1] <- 0
+  #   b[lineMasks$normal==1] <- 0
   
   kern <- makeBrush(11, shape='disc')
   d <- dilateGreyScale(b, kern)
@@ -38,12 +39,13 @@ isolateBacteria <- function(m) {
   
   e <- removeBlobs(d, 50)
   
-  e[m > 0.75] <- 0
+  e[n > 0.5] <- 0
   
   e <- removeBlobs(e, 25)
+  e <- dilateGreyScale(e, makeBrush(3, shape="disc"))
   
   print(proc.time() - ptm)
-
+  
   return(bwlabel(e))
   
 }
@@ -57,7 +59,7 @@ isolateBacteriaOff <- function(m) {
   m <- m * 0.5/mean(m)
   # increase contrast
   m <- (0.4 + m)^2.5
-
+  
   # Create mask of where dark lines are unlikely to contain bacteria
   lineMasks <- darkLineMask(m)
   
@@ -67,11 +69,11 @@ isolateBacteriaOff <- function(m) {
   # Create glcm masks
   a <- glcm(m, n_grey=20, shift=list(c(0,1),c(1,0),c(1,1)), 
             window=c(3,3), min_x=0, max_x=0.5)
-#             statistics=c("homogeneity"))
+  #             statistics=c("homogeneity"))
   
   b <- (m * a[,,1]) < 0.3
   
-
+  
   
   b[artifactMask>0] <- 0
   b[lineMasks$normal==1] <- 0
@@ -93,9 +95,9 @@ isolateBacteriaOff <- function(m) {
   f <- erodeGreyScale(f, kern)
   g <- f * (m < 0.55)
   h <- removeBlobs(g, 15)  
-
+  
   print(proc.time() - ptm)
   
   return(bwlabel(h))
   
-  }
+}
