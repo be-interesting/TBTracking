@@ -9,6 +9,7 @@ isolateBacteria <- function(m) {
   # increase contrast
   m <- (0.4 + m)^3
   
+  m <- equalize(m, c(min(m), max(m)), 250)
   
   
   # Create mask of where dark lines are unlikely to contain bacteria

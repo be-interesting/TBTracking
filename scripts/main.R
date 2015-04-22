@@ -27,12 +27,6 @@ main <- function(dataDir="examples/set_3", n) {
   print(proc.time() - ptm)
   
   frames.labeled <- lapply(frames, isolateBacteria)
-  
-  temp <- function(x) {
-    x[artifactMask==1] <- 0
-    x <- removeBlobs(x, 10)
-    return(x)
-  }
 
   firstFrame <- frames.labeled[[2]]
   centroidsBefore <- getCentroids(firstFrame)
