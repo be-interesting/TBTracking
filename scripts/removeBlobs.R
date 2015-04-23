@@ -1,5 +1,6 @@
 # Remove all blobs under a certain size threshold
 removeBlobs <- function(m, size) {
+  m[is.na(m)] <- 0
   # Label blobs
   m <- bwlabel(m)
   # Save dimensions

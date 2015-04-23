@@ -13,33 +13,52 @@ isolateBacteria <- function(m) {
   n <- m
   
   # Equalize histogram
-  m <- equalize(m) ^ mean(m)
+  m <- equalize(m) ^ mean(m) 
+
+
   
   # Gamma correction
-  m <- equalize(m*n) ^ 0.5
+#   m <- equalize(m*n) ^ 0.5
 
-  # Create glcm masks
+#   # Create glcm masks
   a <- glcm(m, n_grey=15, shift=list(c(1,1)), 
-            window=c(3,3), min_x=0, max_x=max(m), statistics=c("homogeneity"))
-  
-  #??????
-  b <- m * (m + a[,,1])
-  
-  c <- glcm(b, n_grey=15, shift=list(c(1,1)), 
             window=c(3,3), min_x=0, max_x=0.3, statistics=c("dissimilarity"))
+
+  b <- a > 0.5
+#   
+#   #??????
+#   b <- (a[,,1]*3)*m^2 < 0.225
   
-  b <- c[,,1] > 0.5
+#   c <- glcm(b, n_grey=15, shift=list(c(1,1)), 
+#             window=c(3,3), min_x=0, max_x=0.5, statistics=c("dissimilarity"))
+#   
+#   b <- c[,,1] > 0.5
   
   b[artifactMask>0] <- 0
 #   b[lineMasks$normal==1] <- 0
+
+  c <- removeBlobs(b, 10)
+  kern <- makeBrush(5, shape='disc')
+  c <- dilateGreyScale(c, kern)
+  kern <- makeBrush(5, shape='disc')
+  c <- erodeGreyScale(c, kern)
+
+  c <- removeBlobs(c, 20)
+  kern <- makeBrush(9, shape='disc')
+  c <- dilateGreyScale(c, kern)
+  kern <- makeBrush(9, shape='disc')
+  c <- erodeGreyScale(c, kern)
+
+  c <- removeBlobs(c, 50)
   
-  kern <- makeBrush(11, shape='disc')
-  d <- dilateGreyScale(b, kern)
-  d <- erodeGreyScale(d, kern)
+  kern <- makeBrush(25, shape='disc')
+  d <- dilateGreyScale(c, kern)
+  kern <- makeBrush(9, shape='disc')
+  e <- erodeGreyScale(d, kern)
   
-  e <- removeBlobs(d, 50)
+#   e <- removeBlobs(d, 100)
   
-  e[m > 0.75] <- 0
+  e[m > 0.7] <- 0
   
   e <- removeBlobs(e, 25)
 #   e <- dilateGreyScale(e, makeBrush(1, shape="disc"))
