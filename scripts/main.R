@@ -16,10 +16,10 @@ source("scripts/updateCentroidIDs.R")
 
 # Generate output for a given folder
 # Optional: if n, only process that many images
-main <- function(dataDir="examples/set_3", n) {
+main <- function(dataDir="examples/set_2", n) {
   
   # Load frames
-  frames <- loadFrames(dataDir, n=20)
+  frames <- loadFrames(dataDir, n=25)
   
   # Create artifact mask
   ptm <- proc.time()
@@ -67,28 +67,49 @@ main <- function(dataDir="examples/set_3", n) {
   
   # A neat plot
   save <- output
-  output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 10)]
+  output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 12)]
   
-  plot(log(output[,1]), log="y", type="n", ylim=c(log(min(output,na.rm=TRUE)),log(max(output, na.rm=TRUE))), xlim=c(1,20),
+  # Log
+  plot(log(output[,1]), log="y", type="n", ylim=c(log(min(output,na.rm=TRUE)),log(max(output, na.rm=TRUE))),
        xlab="timestep", ylab="log(size)")
   lapply(log(output), lines, lwd=2, col=rgb(0,0,0,0.3))
   lapply(log(output), points, col=rgb(0,0,0,0.4), cex=0.4, pch=19)
+  test <- apply(log(output), 2, getReg)
+  lapply(test, function(x) lines(c(1, 25), c(x[[1]], x[[2]])))
+  
+  
+  getReg <- function(x) {
+    len <-  length(x)
+    x <- x[!is.na(x)]
+    reg <- lm(x ~ seq(1,length(x)))[[1]]
+    a <- reg[[2]]
+    b <- reg[[1]]
+    y1 <- c(a + b)
+    y2 <- c(a*len + b)
+    return(list(y1,y2))
+  }
+  
+  # Linear
+  plot(output[,1], type="n", ylim=c(min(output,na.rm=TRUE),max(output, na.rm=TRUE)),
+       xlab="timestep", ylab="log(size)")
+  lapply(output, lines, lwd=2, col=rgb(0,0,0,0.3))
+  lapply(output, points, col=rgb(0,0,0,0.4), cex=0.4, pch=19)
   
 }
 
-#   i <- 0
-#   for (frame in frames.labeled) {
-#     i <- i+1
-#     writeImage(frame,paste0("frames1/",i,".tif"))    
-#     Sys.sleep(0.3)
-#   }
-#   
-#   i <- 0
-#   for (frame in frames) {
-#     i <- i+1
-#     writeImage(frame,paste0("frames2/",i,".tif"))    
-#     Sys.sleep(0.3)
-#   }
+  i <- 0
+  for (frame in frames.labeled) {
+    i <- i+1
+    writeImage(frame,paste0("frames1/",i,".tif"))    
+    Sys.sleep(0.3)
+  }
+  
+  i <- 0
+  for (frame in frames) {
+    i <- i+1
+    writeImage(frame,paste0("frames2/",i,".tif"))    
+    Sys.sleep(0.3)
+  }
 
 boxplot(t(log(output)), xlab = "timestep", ylab = "log( size )",)
 
