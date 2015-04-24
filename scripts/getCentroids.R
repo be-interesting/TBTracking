@@ -1,6 +1,6 @@
 getCentroids <- function(m) {
   
-  m <- bwlabel(m)
+#   m <- bwlabel(m)
   
   x <- numeric(max(m))
   y <- numeric(max(m))

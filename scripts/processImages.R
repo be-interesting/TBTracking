@@ -79,10 +79,14 @@ processImages <- function(images, sample=c(150,450,125)) {
 # 
 # ### TEMPORARY 
 # ### Subset and save these images
-# 
-saveSmallSubset <- function(image, filename) {
-  writeImage(image[1020:1620,480:1080], paste0("examples/set_2/", filename))
+#
+for (i in 1:length(images)) {
+  im <- images[[i]][1020:2220,0:650]
+  ii <- floor(i/26) + 1
+  jj <- i %% 26
+  writeImage(im, paste0("images/full_post_cropped/", LETTERS[ii], LETTERS[jj], ".tif"))
 }
+
 # 
 # lapply(images, saveSmallSubset)
 # 

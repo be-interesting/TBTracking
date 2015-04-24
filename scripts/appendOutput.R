@@ -1,6 +1,6 @@
 
 # update the output with a new timestep and 
-appendOutput <- function(c1, g, output) {
+appendOutput <- function(c1, output) {
   
   # find 
   newIDs <- c1[!(c1$id %in% colnames(output)),]

@@ -16,10 +16,10 @@ source("scripts/updateCentroidIDs.R")
 
 # Generate output for a given folder
 # Optional: if n, only process that many images
-main <- function(dataDir="examples/full_post_cropped", n) {
+main <- function(dataDir="images/full_post", n) {
   
   # Load frames
-  frames <- loadFrames(dataDir, n=20)
+  frames <- loadFrames(dataDir, n=30)
   
   # Create artifact mask
   ptm <- proc.time()
@@ -53,7 +53,7 @@ main <- function(dataDir="examples/full_post_cropped", n) {
     
     # For those continued group, give them the proper ID's from the previous frame
     centroidsAfter <- updateCentroidIDs(centroidsAfter, groups)
-    output <- appendOutput(centroidsAfter, groups, output)
+    output <- appendOutput(centroidsAfter, output)
     
     saved[[i]] <- centroidsAfter
     
@@ -70,61 +70,48 @@ main <- function(dataDir="examples/full_post_cropped", n) {
   output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 12)]
   
   # Log
-  plot(log(output[,1]), log="y", type="n", ylim=c(log(min(output,na.rm=TRUE)),log(max(output, na.rm=TRUE))),
-       xlab="timestep", ylab="log(size)")
-  lapply(log(output), lines, lwd=2, col=rgb(0,0,0,0.3))
-  lapply(log(output), points, col=rgb(0,0,0,0.4), cex=0.4, pch=19)
-  test <- apply(log(output), 2, getReg)
-  lapply(test, function(x) lines(c(1, 25), c(x[[1]], x[[2]])))
-  
-  
-  getReg <- function(x) {
-    len <-  length(x)
-    x <- x[!is.na(x)]
-    reg <- lm(x ~ seq(1,length(x)))[[1]]
-    a <- reg[[2]]
-    b <- reg[[1]]
-    y1 <- c(a + b)
-    y2 <- c(a*len + b)
-    return(list(y1,y2))
-  }
-  
-  # Linear
-  plot(output[,1], type="n", ylim=c(min(output,na.rm=TRUE),max(output, na.rm=TRUE)),
+  plot(output[,1], log="y", type="n", ylim=c(min(output,na.rm=TRUE),max(output, na.rm=TRUE)),
        xlab="timestep", ylab="log(size)")
   lapply(output, lines, lwd=2, col=rgb(0,0,0,0.3))
   lapply(output, points, col=rgb(0,0,0,0.4), cex=0.4, pch=19)
+  test <- apply(log(output), 2, getReg)
+  lapply(test, function(x) lines(c(1, 25), c(x[[1]], x[[2]])))
+  
+
   
 }
 
-  i <- 0
-  for (frame in frames.labeled) {
-    i <- i+1
-    writeImage(frame,paste0("frames1/",i,".tif"))    
-    Sys.sleep(0.3)
-  }
-  
-  i <- 0
-  for (frame in frames) {
-    i <- i+1
-    writeImage(frame,paste0("frames2/",i,".tif"))    
-    Sys.sleep(0.3)
-  }
+#   i <- 0
+#   for (frame in frames.labeled) {
+#     i <- i+1
+#     writeImage(frame,paste0("frames1/",i,".tif"))    
+#     Sys.sleep(0.3)
+#   }
+#   
+#   i <- 0
+#   for (frame in frames) {
+#     i <- i+1
+#     writeImage(frame,paste0("frames2/",i,".tif"))    
+#     Sys.sleep(0.3)
+#   }
 
 boxplot(t(log(output)), xlab = "timestep", ylab = "log( size )",)
 
 # For a given id, "display" each frame that contains that id
-showChanges <- function(id, frames, centroids) {
-  for (i in 2:length(frames)) {
+showChanges <- function(id, f, centroids) {
+  for (i in 2:length(f)) {
     if (sum(centroids[[i]]$id == id) > 0) {
       label <- which(centroids[[i]]$id == id)
-      display(frames[[i]] == label)
+      mask <- f[[i]] == label
+      f1 <- frames[[i]]
+      f1[mask] <- 1
+      display(f1)
       Sys.sleep(0.3)
     }
   }
 }
 
-showChanges(colnames(output)[[50]], frames.labeled, saved)
+showChanges(colnames(output)[[2]], frames.labeled, saved)
 
 # Look at each line individually
 for (i in 1:dim(output)[[2]]) {
