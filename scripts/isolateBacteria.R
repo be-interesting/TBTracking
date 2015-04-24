@@ -7,7 +7,7 @@ isolateBacteria <- function(m) {
   # m <- frames[[4]]
   
   # Calculate homogeneity
-  a <- glcm(m, window=c(5,5), statistics=c("homogeneity"))
+  a <- glcm(m, n_grey=15, window=c(3,3), statistics=c("homogeneity"))
   
   # This essentially finds edges
   b <- 1 - (1-a[,,1])^3

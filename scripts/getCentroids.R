@@ -1,12 +1,9 @@
 getCentroids <- function(m) {
   
-#   m <- bwlabel(m)
-  
   x <- numeric(max(m))
   y <- numeric(max(m))
-  z <- numeric(max(m))
+  size <- numeric(max(m))
   id <- character(max(m))
-  index <- numeric(max(m))
   
   generateSeq <- function() {
     x <- floor(runif(10,1,26.9))
@@ -18,12 +15,16 @@ getCentroids <- function(m) {
     ind <- which(m1, arr.ind=T)
     x[[i]] <- mean(ind[,1])
     y[[i]] <- mean(ind[,2])
-    z[[i]] <- sum(m1)
+    size[[i]] <- sum(m1)
     id[[i]] <- generateSeq()
-    index[[i]] <- i
+    
   }
   
-  return(data.frame(x=x,y=y,size=z,id=id,index=index))
+  df <- data.frame(x=x,y=y,size=size,id=id)
+  
+  df <- df[size>0,]
+
+  return(df)
   
 }
 

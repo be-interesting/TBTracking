@@ -19,7 +19,9 @@ source("scripts/updateCentroidIDs.R")
 main <- function(dataDir="images/full_post", n) {
   
   # Load frames
+  ptm <- proc.time()
   frames <- loadFrames(dataDir, n=30)
+  print(proc.time() - ptm)
   
   # Create artifact mask
   ptm <- proc.time()

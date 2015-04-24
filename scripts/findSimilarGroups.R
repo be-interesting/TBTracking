@@ -5,7 +5,7 @@
 findSimilarGroups <- function(c1, c2) {
   
   # Initialize dataframe with each combination of the two indices
-  df <- expand.grid(index1=c1$index, index2=c2$index)
+  df <- expand.grid(index1=seq(1,dim(c1)[[1]]), index2=seq(1,dim(c2)[[1]]))
   df$id1 <- c1$id[df$index1]
   df$id2 <- c2$id[df$index2]
   
@@ -23,7 +23,7 @@ findSimilarGroups <- function(c1, c2) {
   
   # Calculate the growth
   df$growthPer <- size2 / size1
-  df$growthRel <- unlist(lapply(df$growthPer, function(x) if(x > 1) return(1/x) else return(x)))
+  df$growthRel <- unlist(lapply(df$growthPer, function(x) if(x > 1) { return(1/x)  } else { return(x) }))
   
   # Calculate "score" of group fit
   df$score <- (0.5^(df$dist/10)) * (df$growthRel^0.1)
