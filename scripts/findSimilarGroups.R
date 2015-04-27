@@ -26,7 +26,7 @@ findSimilarGroups <- function(c1, c2) {
   df$growthRel <- unlist(lapply(df$growthPer, function(x) if(x > 1) { return(1/x)  } else { return(x) }))
   
   # Calculate "score" of group fit
-  df$score <- (0.5^(df$dist/10)) * (df$growthRel^0.1)
+  df$score <- (0.5^(df$dist/20)) * (df$growthRel^0.2)
   
   # Remove undefinted scores
   df <- df[!is.nan(df$score),]
@@ -35,7 +35,7 @@ findSimilarGroups <- function(c1, c2) {
   df <- df[df$growthPer < 1.5 & df$growthPer > 0.75,]
   
   # Remove unrealistic distance travelled
-  df <- df[df$dist < 50,]
+  df <- df[df$dist < 20,]
   
   # Sort scores
   df <- df[order(-df$score),]

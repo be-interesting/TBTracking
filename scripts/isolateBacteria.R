@@ -7,14 +7,16 @@ isolateBacteria <- function(m) {
   # m <- frames[[4]]
   
   # Calculate homogeneity
-  a <- glcm(m, n_grey=15, window=c(3,3), statistics=c("homogeneity"))
+  a <- glcm(m, n_grey=25, window=c(3,3), statistics=c("homogeneity"))
   
   # This essentially finds edges
   b <- 1 - (1-a[,,1])^3
   
   # Multiplying the edges by the original image darkens only the edges of the bacteria.
   # This reduces the chance of dark regions in the background being captured.
-  c <- (b * m) < 0.25
+  c <- (b * m)
+  
+  c <- c < 0.25
   
   # Apply artifact mask
   c[artifactMask>0] <- 0
@@ -52,7 +54,7 @@ isolateBacteria <- function(m) {
   
   # Since sections are already labeled it's safe to remove a lot of the excess
   # White so we get a more accurate reading
-  h[(equalize(m)^0.5) > 0.4] <- 0
+  h[(equalize(m)^0.5) > 0.45] <- 0
   
   print(proc.time() - ptm)
   

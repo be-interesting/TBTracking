@@ -4,6 +4,7 @@ getCentroids <- function(m) {
   y <- numeric(max(m))
   size <- numeric(max(m))
   id <- character(max(m))
+  index <- numeric(max(m))
   
   generateSeq <- function() {
     x <- floor(runif(10,1,26.9))
@@ -17,10 +18,10 @@ getCentroids <- function(m) {
     y[[i]] <- mean(ind[,2])
     size[[i]] <- sum(m1)
     id[[i]] <- generateSeq()
-    
+    index[[i]] <- i
   }
   
-  df <- data.frame(x=x,y=y,size=size,id=id)
+  df <- data.frame(x=x,y=y,size=size,id=id,index=index)
   
   df <- df[size>0,]
 

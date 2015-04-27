@@ -16,11 +16,11 @@ source("scripts/updateCentroidIDs.R")
 
 # Generate output for a given folder
 # Optional: if n, only process that many images
-main <- function(dataDir="images/full_post", n) {
+main <- function(dataDir="images/full_post_cropped", n) {
   
   # Load frames
   ptm <- proc.time()
-  frames <- loadFrames(dataDir, n=30)
+  frames <- loadFrames(dataDir, n=35)
   print(proc.time() - ptm)
   
   # Create artifact mask
@@ -104,6 +104,8 @@ showChanges <- function(id, f, centroids) {
   for (i in 2:length(f)) {
     if (sum(centroids[[i]]$id == id) > 0) {
       label <- which(centroids[[i]]$id == id)
+      label <- centroids[[i]]$index[[label]]
+#       display(f[[i]]==label)
       mask <- f[[i]] == label
       f1 <- frames[[i]]
       f1[mask] <- 1
@@ -113,7 +115,7 @@ showChanges <- function(id, f, centroids) {
   }
 }
 
-showChanges(colnames(output)[[2]], frames.labeled, saved)
+showChanges(colnames(output)[[30]], frames.labeled, saved)
 
 # Look at each line individually
 for (i in 1:dim(output)[[2]]) {
