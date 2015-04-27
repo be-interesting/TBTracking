@@ -76,9 +76,6 @@ main <- function(dataDir="images/full_post_cropped", n) {
        xlab="timestep", ylab="log(size)")
   lapply(output, lines, lwd=2, col=rgb(0,0,0,0.3))
   lapply(output, points, col=rgb(0,0,0,0.4), cex=0.4, pch=19)
-  test <- apply(log(output), 2, getReg)
-  lapply(test, function(x) lines(c(1, 25), c(x[[1]], x[[2]])))
-  
 
   
 }
@@ -115,7 +112,7 @@ showChanges <- function(id, f, centroids) {
   }
 }
 
-showChanges(colnames(output)[[30]], frames.labeled, saved)
+showChanges(colnames(output)[[2]], frames.labeled, saved)
 
 # Look at each line individually
 for (i in 1:dim(output)[[2]]) {

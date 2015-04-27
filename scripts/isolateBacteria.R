@@ -54,7 +54,7 @@ isolateBacteria <- function(m) {
   
   # Since sections are already labeled it's safe to remove a lot of the excess
   # White so we get a more accurate reading
-  h[(equalize(m)^0.5) > 0.45] <- 0
+  h[(equalize(m)^0.5) > 0.5] <- 0
   
   print(proc.time() - ptm)
   
