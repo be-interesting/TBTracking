@@ -69,7 +69,7 @@ main <- function(dataDir="images/full_post_cropped", n) {
   
   # A neat plot
   save <- output
-  output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 12)]
+  output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 15)]
   
   # Log
   plot(output[,1], log="y", type="n", ylim=c(min(output,na.rm=TRUE),max(output, na.rm=TRUE)),
@@ -94,7 +94,7 @@ main <- function(dataDir="images/full_post_cropped", n) {
 #     Sys.sleep(0.3)
 #   }
 
-boxplot(t(log(output)), xlab = "timestep", ylab = "log( size )",)
+boxplot(t(output), log="y", xlab = "timestep", ylab = "log( size )",)
 
 # For a given id, "display" each frame that contains that id
 showChanges <- function(id, f, centroids) {
