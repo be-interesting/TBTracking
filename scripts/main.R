@@ -27,7 +27,7 @@ main <- function(dataDir="images/full_post_cropped", n) {
   ptm <- proc.time()
   artifactMask <- createArtifactMask(frames[[1]]@.Data)
   print(proc.time() - ptm)
-  
+    
   frames.labeled <- lapply(frames, isolateBacteria)
 
   firstFrame <- frames.labeled[[2]]
@@ -70,6 +70,7 @@ main <- function(dataDir="images/full_post_cropped", n) {
   # A neat plot
   save <- output
   output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 15)]
+  output <- output[,apply(output, 2, function(x) max(x,na.rm=T) > 1900)]
   
   # Log
   plot(output[,1], log="y", type="n", ylim=c(min(output,na.rm=TRUE),max(output, na.rm=TRUE)),
@@ -115,7 +116,7 @@ showChanges <- function(id, f, centroids) {
 showChanges(colnames(output)[[2]], frames.labeled, saved)
 
 # Look at each line individually
-for (i in 1:dim(output)[[2]]) {
+for (i in 150:dim(output)[[2]]) {
   print(i)
   plot(log(output[,i]), log="y", type="l", ylim=c(log(min(output,na.rm=TRUE)),log(max(output, na.rm=TRUE))),
        xlim=c(0,25),xlab="timestep", ylab="log(size)")

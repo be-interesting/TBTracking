@@ -21,3 +21,16 @@ for (i in 26:50) {
   showChanges(colnames(output)[[i]], frames.labeled, saved)
 }
 
+
+
+f <- frames.labeled
+dir.create(paste0("images/",id))
+for (i in 2:length(frames)) {
+    mask <- f[[i]] > 0
+    f1 <- frames[[i]]
+    f1[mask] <- 1
+    j <- ifelse(i<10,paste0("0",i),i)
+    writeImage(f1,paste0("images/",id,"/",j,".tif"))
+    Sys.sleep(0.3)
+  
+}

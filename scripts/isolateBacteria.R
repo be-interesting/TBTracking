@@ -1,4 +1,3 @@
-
 isolateBacteria <- function(m) {
   
   print("Searching new frame...")
@@ -16,21 +15,10 @@ isolateBacteria <- function(m) {
   # This reduces the chance of dark regions in the background being captured.
   c <- (b * m)
   
-  if (norm(m) < 670) {
-    c <- c < 0.275
-  } else {
-    c <- c < 0.25
-  }
-
-
+  c <- c < 0.25
   
   # Apply artifact mask
   c[artifactMask>0] <- 0
-  
-  c <- dilateGreyScale(c, makeBrush(3, shape='disc'))
-  c <- erodeGreyScale(c, makeBrush(3, shape='disc'))
-  
-  c <- removeBlobs(c, 5)
   
   # Mild dilate/erode to close small gaps
   d <- dilateGreyScale(c, makeBrush(7, shape='disc'))
@@ -48,18 +36,11 @@ isolateBacteria <- function(m) {
   g <- removeBlobs(f, 25)
   
   # Large dilate to garuntee all of the area around the bacteria is selected.
-  h <- dilateGreyScale(g, makeBrush(11, shape='disc'))
+  h <- dilateGreyScale(g, makeBrush(15, shape='disc'))
   
   # Equalize m, which flattens the value histogram. This greatly increases the
   # contrast around the edges. Then select the lighter areas from that region and
-  
-  if (norm(m) < 670) {
-    h[(equalize(m)) > 0.6] <- 0
-  } else {
-    h[(equalize(m)) > 0.4] <- 0
-  }
-  
-  
+  h[(equalize(m)) > 0.5] <- 0
   
   # Remove noise
   h <- removeBlobs(h, 20)
@@ -72,20 +53,10 @@ isolateBacteria <- function(m) {
   
   # Since sections are already labeled it's safe to remove a lot of the excess
   # White so we get a more accurate reading
-  if (norm(m) < 670) {
-    h[m > 0.45] <- 0
-  } else {
-    h[m > 0.4] <- 0
-  }
-  
- 
-  
-  h[artifactMask>0] <- 0
+  h[(equalize(m)^0.5) > 0.5] <- 0
   
   print(proc.time() - ptm)
   
   return(h)
   
 }
-
-
