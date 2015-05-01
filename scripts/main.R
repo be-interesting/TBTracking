@@ -29,10 +29,20 @@ main <- function(dataDir="images/full_post_cropped", n) {
   print(proc.time() - ptm)
     
   frames.labeled <- lapply(frames, isolateBacteria)
-
+  
+  #####
+  # EXPERIMENTAL
+  # Total area shouldn't decrease, remove frames where they do
+  totalArea <- unlist(lapply(frames.labeled, function(x) sum(x>0, na.rm=TRUE)))
+  badFrames <- which(diff(totalArea) < 0) + 1
+  frames.labeled[badFrames] <- frames.labeled[badFrames-1]
+  ######
+  
   firstFrame <- frames.labeled[[2]]
   centroidsBefore <- getCentroids(firstFrame)
   centroidsBefore <- centroidsBefore[!(round(centroidsBefore$y) %in% c(seq(690,747),seq(1586,1654))),]
+  
+  
   
   output <- data.frame(t(data.frame(centroidsBefore$size,row.names=centroidsBefore$id)))
   
@@ -69,17 +79,18 @@ main <- function(dataDir="images/full_post_cropped", n) {
   
   # A neat plot
   save <- output
-  output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 15)]
-  output <- output[,apply(output, 2, function(x) max(x,na.rm=T) > 1900)]
+  output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 20)]
+#   output <- output[,apply(output, 2, function(x) max(x,na.rm=T) > 1900)]
   
   # Log
   plot(output[,1], log="y", type="n", ylim=c(min(output,na.rm=TRUE),max(output, na.rm=TRUE)),
        xlab="timestep", ylab="log(size)")
   lapply(output, lines, lwd=2, col=rgb(0,0,0,0.3))
   lapply(output, points, col=rgb(0,0,0,0.4), cex=0.4, pch=19)
-
   
 }
+
+
 
 #   i <- 0
 #   for (frame in frames.labeled) {
@@ -113,10 +124,10 @@ showChanges <- function(id, f, centroids) {
   }
 }
 
-showChanges(colnames(output)[[2]], frames.labeled, saved)
+showChanges(colnames(output)[[3]], frames.labeled, saved)
 
 # Look at each line individually
-for (i in 150:dim(output)[[2]]) {
+for (i in 2:dim(output)[[2]]) {
   print(i)
   plot(log(output[,i]), log="y", type="l", ylim=c(log(min(output,na.rm=TRUE)),log(max(output, na.rm=TRUE))),
        xlim=c(0,25),xlab="timestep", ylab="log(size)")
