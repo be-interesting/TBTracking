@@ -20,7 +20,7 @@ main <- function(dataDir="images/full_post_cropped", n) {
   
   # Load frames
   ptm <- proc.time()
-  frames <- loadFrames(dataDir, n=35)
+  frames <- loadFrames(dataDir, n=5)
   print(proc.time() - ptm)
   
   # Create artifact mask
@@ -79,7 +79,7 @@ main <- function(dataDir="images/full_post_cropped", n) {
   
   # A neat plot
   save <- output
-  output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 20)]
+  output <- output[,apply(output, 2, function(x) sum(!is.na(x)) > 15)]
 #   output <- output[,apply(output, 2, function(x) max(x,na.rm=T) > 1900)]
   
   # Log
