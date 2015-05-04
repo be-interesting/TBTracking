@@ -1,7 +1,6 @@
 library(EBImage)
 library(glcm)
-library(plyr)
-library(RColorBrewer)
+library(dplyr)
 
 source("scripts/loadFrames.R")
 source("scripts/processImages.R")
@@ -13,6 +12,8 @@ source("scripts/getCentroids.R")
 source("scripts/findSimilarGroups.R")
 source("scripts/appendOutput.R")
 source("scripts/updateCentroidIDs.R")
+source("scripts/addGridToImage.R")
+
 
 # Generate output for a given folder
 # Optional: if n, only process that many images
@@ -20,7 +21,7 @@ main <- function(dataDir="images/full_post_cropped", n) {
   
   # Load frames
   ptm <- proc.time()
-  frames <- loadFrames(dataDir, n=5)
+  frames <- loadFrames(dataDir, n=10)
   print(proc.time() - ptm)
   
   # Create artifact mask
@@ -33,9 +34,9 @@ main <- function(dataDir="images/full_post_cropped", n) {
   #####
   # EXPERIMENTAL
   # Total area shouldn't decrease, remove frames where they do
-  totalArea <- unlist(lapply(frames.labeled, function(x) sum(x>0, na.rm=TRUE)))
-  badFrames <- which(diff(totalArea) < 0) + 1
-  frames.labeled[badFrames] <- frames.labeled[badFrames-1]
+#   totalArea <- unlist(lapply(frames.labeled, function(x) sum(x>0, na.rm=TRUE)))
+#   badFrames <- which(diff(totalArea) < 0) + 1
+#   frames.labeled[badFrames] <- frames.labeled[badFrames-1]
   ######
   
   firstFrame <- frames.labeled[[2]]

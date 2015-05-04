@@ -11,6 +11,8 @@ addGridToImage <- function(image, spacing=200, startx=0, starty=0) {
   
   png("temp123423453456.png",width=dimx,height=dimy)
   
+  oldPar <- par()
+  
   par(mar=c(0,0,0,0), oma=c(0,0,0,0))
   
   plot(0,0, ylim=c(dimy,1), xlim=c(1,dimx), type="n", axes=T, xaxt="n", yaxt='n', xaxs='i', yaxs='i')
@@ -24,6 +26,8 @@ addGridToImage <- function(image, spacing=200, startx=0, starty=0) {
   }
   
   dev.off()
+  
+  par(oldPar)
   
   labels <- 1- readImage("temp123423453456.png")[,,1]
   
