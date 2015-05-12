@@ -1,7 +1,7 @@
 # Aligns, and recolors all of the .tif images in a folder
 # Assumes that the first frame is a background image
 # Arguments: list of images to be aligned, sample space to align to (x,y,side length)
-processImages <- function(images, sample=c(150,450,125)) {
+processImages <- function(images, sample=c(150,450,125), crop=150) {
   
     normalizeValue <- function(m) {      
       # brighten
@@ -50,16 +50,16 @@ processImages <- function(images, sample=c(150,450,125)) {
       height <- dim(image)[[2]]
       
       # Crop image, adjust by offsets
-      images[[i]] <- image[(150 + offset.x):(width + offset.x - 150),
-                           (150 + offset.y):(height + offset.y - 150)]
+      images[[i]] <- image[(crop + offset.x):(width + offset.x - crop),
+                           (crop + offset.y):(height + offset.y - crop)]
       
     }
     
     background <- images[[1]]
     
     # Crop background
-    background <- background[150:(dim(background)[[1]]-150),
-                             150:(dim(background)[[2]]-150)]
+    background <- background[crop:(dim(background)[[1]]-crop),
+                             crop:(dim(background)[[2]]-crop)]
     
     images[[1]] <- background
     
