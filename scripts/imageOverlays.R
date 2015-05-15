@@ -1,5 +1,6 @@
 
-
+# Add a grid overlay to an image with a given spacing. Grid labels are on 
+# The top and left side.
 addGridToImage <- function(image, spacing=200, startx=0, starty=0) {
   
   dimx <- dim(image)[[1]]
@@ -27,8 +28,45 @@ addGridToImage <- function(image, spacing=200, startx=0, starty=0) {
   
   return(image)
   
+}
+
+addBlobOverlaysToImage <- function(image, labels) {
+  image[labels > 0] <- 1
+}
+
+# Add the unique ID of blobs in an image. Required an image and 
+# A DF of ID and numeric labels
+addBlobLabelsToImage <- function(image, centroids, labels=NA, startx=0, starty=0, 
+                                 overlay=FALSE, labelbg=TRUE) {
+ 
+  dimx <- dim(image)[[1]]
+  dimy <- dim(image)[[2]]
+  
+  if (overlay) {
+    image[labels > 0] <- 1
+  }
+  
+  labelf = function() {
+    text(centroids$x, centroids$y, centroids$id, cex=0.9)
+  }
+  
+  rectf = function() {
+    rect(centroids$x-40, centroids$y-8, centroids$x+40, centroids$y+8, col='black')
+  }
+  
+  if (labelbg) {
+    rectmat <- plotToOverlay(rectf, dimx, dimy)
+    image[rectmat > 0] <- image[rectmat > 0.3] * 0.6
+  }
+    
+  labmat <- plotToOverlay(labelf, dimx, dimy)
+  
+  image[labmat > 0.3] <- 1
+
+  return(image)
   
 }
+
 
 
 
