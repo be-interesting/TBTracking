@@ -10,4 +10,5 @@ updateCentroidIDs <- function(c1, g) {
   c1$id <- as.character(lapply(idList, function(x) if(x %in% id2) id1[which(id2==x)] else x))
   
   return(c1)
+  
 }

@@ -5,14 +5,12 @@ library(dplyr)
 source("scripts/loadFrames.R")
 source("scripts/processImages.R")
 source("scripts/createArtifactMask.R")
-source("scripts/darkLineMask.R")
 source("scripts/removeBlobs.R")
 source("scripts/isolateBacteria.R")
 source("scripts/getCentroids.R")
 source("scripts/findSimilarGroups.R")
 source("scripts/appendOutput.R")
 source("scripts/updateCentroidIDs.R")
-source("scripts/addGridToImage.R")
 
 
 # Generate output for a given folder

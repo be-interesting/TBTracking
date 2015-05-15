@@ -1,4 +1,7 @@
+# Work computer
 dataDir <- "/Volumes/KINGSTON/Shearman_lab_Rif-INH Drug Tolerance, 5-14-14, Chamber C/xy6//Phase"
+# Laptop
+dataDir <- "~/Desktop/tbTest/xy6/Phase/"
 
 # Load 10 frames into a list
 frames <- loadFrames(dataDir, 10, -1.5)
