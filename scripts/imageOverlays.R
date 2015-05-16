@@ -32,6 +32,7 @@ addGridToImage <- function(image, spacing=200, startx=0, starty=0) {
 
 addBlobOverlaysToImage <- function(image, labels) {
   image[labels > 0] <- 1
+  return(image)
 }
 
 # Add the unique ID of blobs in an image. Required an image and 
@@ -47,16 +48,16 @@ addBlobLabelsToImage <- function(image, centroids, labels=NA, startx=0, starty=0
   }
   
   labelf = function() {
-    text(centroids$x, centroids$y, centroids$id, cex=0.9)
+    text(centroids$x, centroids$ymin-8, centroids$id, cex=1)
   }
   
   rectf = function() {
-    rect(centroids$x-40, centroids$y-8, centroids$x+40, centroids$y+8, col='black')
+    rect(centroids$x-40, centroids$ymin-16, centroids$x+40, centroids$ymin, col='black')
   }
   
   if (labelbg) {
     rectmat <- plotToOverlay(rectf, dimx, dimy)
-    image[rectmat > 0] <- image[rectmat > 0.3] * 0.6
+    image[rectmat > 0.5] <- image[rectmat > 0.5] * 0.6
   }
     
   labmat <- plotToOverlay(labelf, dimx, dimy)

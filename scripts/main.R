@@ -132,3 +132,11 @@ for (i in 2:dim(output)[[2]]) {
        xlim=c(0,25),xlab="timestep", ylab="log(size)")
   Sys.sleep(0.5)
 }  
+
+
+
+
+
+
+
+
