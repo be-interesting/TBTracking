@@ -19,7 +19,7 @@ main <- function(dataDir="images/full_post_cropped", n) {
   
   # Load frames
   ptm <- proc.time()
-  frames <- loadFrames(dataDir, n=10)
+  frames <- loadFrames(dataDir, n=3)
   print(proc.time() - ptm)
   
   # Create artifact mask
@@ -137,6 +137,16 @@ for (i in 2:dim(output)[[2]]) {
 
 
 
+test1 <- lapply(frames, addGridToImage)
 
+saved[[1]] <- NULL
+frames[[1]] <- NULL
+frames.labeled[[1]] <- NULL
 
+test2 <- mapply(addBlobLabelsToImage, image=frames, centroids=saved, labelbg=FALSE, SIMPLIFY=FALSE)
 
+test3 <- mapply(addGridToImage, image=test2, SIMPLIFY=FALSE)
+
+test4 <- mapply(addBlobOverlaysToImage, test1, frames.labeled, SIMPLIFY=FALSE)
+
+test5 <-  mapply(addBlobLabelsToImage, image=test4, centroids=saved, SIMPLIFY=FALSE)
