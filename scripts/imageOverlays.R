@@ -38,7 +38,7 @@ addBlobOverlaysToImage <- function(image, labels) {
 # Add the unique ID of blobs in an image. Required an image and 
 # A DF of ID and numeric labels
 addBlobLabelsToImage <- function(image, centroids, labels=NA, startx=0, starty=0, 
-                                 overlay=FALSE, labelbg=TRUE) {
+                                 overlay=FALSE, labelbg=FALSE) {
  
   dimx <- dim(image)[[1]]
   dimy <- dim(image)[[2]]
