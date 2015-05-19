@@ -14,14 +14,15 @@ getCentroids <- function(m) {
   
   ### TODO how to handle length ind = 0
   for (i in 1:max(m)) {
+    print(i)
     m1 <- m == i
     ind <- which(m1, arr.ind=T)
-      x[[i]] <- mean(ind[,1])
-      y[[i]] <- mean(ind[,2])
-      ymin[[i]] <- min(ind[,2])
-      size[[i]] <- sum(m1)
-      id[[i]] <- generateSeq(round(mean(ind[,1])),round(mean(ind[,2])),sum(m1))
-      index[[i]] <- i
+    x[[i]] <- mean(ind[,1])
+    y[[i]] <- mean(ind[,2])
+    ymin[[i]] <- min(ind[,2])
+    size[[i]] <- sum(m1)
+    id[[i]] <- generateSeq(round(mean(ind[,1])),round(mean(ind[,2])),sum(m1))
+    index[[i]] <- i
   }
   
   df <- data.frame(x=x,y=y,ymin=ymin,size=size,id=id,index=index)
